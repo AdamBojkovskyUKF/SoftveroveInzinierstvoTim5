@@ -13,16 +13,20 @@ import java.util.List;
 @RestController
 public class RestCallController {
     @Autowired
-    DefaultPersonService service;
+    DefaultPersonService personService;
 
     @GetMapping("/test")
-    public String handleGetRequest() {
+    public String handleTestRequest() {
         PersonDTO p = new PersonDTO();
         p.setId_person(0);
         p.setName("name");
-        service.savePerson(p);
-        List <PersonDTO> persons = service.getAllPersons();
+        personService.savePerson(p);
+        List <PersonDTO> persons = personService.getAllPersons();
         String firstPerson = persons.get(0).getName();
         return firstPerson;
+    }
+    @GetMapping("/dataSeed")
+    public String handleDataSeedRequest(){
+        return "Data Loaded";
     }
 }

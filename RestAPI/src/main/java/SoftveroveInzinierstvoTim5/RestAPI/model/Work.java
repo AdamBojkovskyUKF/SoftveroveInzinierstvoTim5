@@ -10,7 +10,11 @@ public class Work {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
+ private String id_work;
+ @Id
  private int offer_id_offer;
+ @Id
+ private int account_id_account;
  private String contract;
  private String work_log;
  private String state;

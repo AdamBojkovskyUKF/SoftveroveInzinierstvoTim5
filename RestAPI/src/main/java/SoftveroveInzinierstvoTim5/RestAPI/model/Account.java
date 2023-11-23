@@ -10,11 +10,15 @@ public class Account {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
- private Integer person_id_person;
-
- private int work_offer_id;
- private int company_id_company;
  private int id_account;
+ @Id
+ private Integer person_id_person;
+ @Id
+ private int company_id_company;
+ @Id
+ private int study_program_idstudy_program;
+
+
  private String email_address;
  private String password;
  private String role;

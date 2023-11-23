@@ -10,8 +10,9 @@ public class Offer {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
- private int person_id_person;
  private int id_offer;
+ @Id
+ private int person_id_person;
  private String position;
  private String description;
  private String contract_type;
