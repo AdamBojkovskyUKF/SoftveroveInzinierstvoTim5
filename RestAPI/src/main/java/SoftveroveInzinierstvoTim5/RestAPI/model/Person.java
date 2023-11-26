@@ -14,10 +14,15 @@ public class Person {
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private int id_person;
+ @Column
  private String name;
+ @Column
  private String surname;
+ @Column
  private String address;
+ @Column
  private String phone_number;
+ @Column
  private String email;
 
  public Person() {
@@ -70,5 +75,5 @@ public class Person {
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
 }

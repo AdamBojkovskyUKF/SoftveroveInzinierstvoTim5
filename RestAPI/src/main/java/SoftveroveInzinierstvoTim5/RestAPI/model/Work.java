@@ -1,11 +1,8 @@
 package SoftveroveInzinierstvoTim5.RestAPI.model;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
  @Entity
  @EntityListeners(AuditingEntityListener.class)
@@ -16,6 +13,7 @@ public class Work {
  private int id_work;
  @Id
  private int offer_id_offer;
+ @Id
  private int account_id_account;
  private String contract;
  private String work_log;
@@ -23,7 +21,6 @@ public class Work {
  private String feedback_student;
  private String feedback_company;
  private String mark;
- private String completion_year;
 
  public Work() {
  }

@@ -1,11 +1,8 @@
 package SoftveroveInzinierstvoTim5.RestAPI.model;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -13,17 +10,20 @@ public class Account {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
-
- private int person_id_person;
- private int company_id_company;
- private int study_program_idstudy_program;
  private int id_account;
+ @Id
+ private Integer person_id_person;
+ @Id
+ private int company_id_company;
+ @Id
+ private int study_program_idstudy_program;
+
+
  private String email_address;
  private String password;
  private String role;
  private String study_level;
  private String signup_year;
- private String institute;
 
  public Account() {
     
@@ -108,5 +108,7 @@ public class Account {
     public void setInstitute(String institute) {
         this.institute = institute;
     }
+
+ }
 
 }

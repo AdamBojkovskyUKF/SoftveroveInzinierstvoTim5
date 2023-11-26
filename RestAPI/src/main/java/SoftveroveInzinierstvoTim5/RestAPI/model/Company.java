@@ -1,11 +1,9 @@
 package SoftveroveInzinierstvoTim5.RestAPI.model;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.hibernate.annotations.ForeignKey;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -53,5 +51,5 @@ public class Company {
     public void setAddress(String address) {
         this.address = address;
     }
-
+  
 }
