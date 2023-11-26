@@ -1,33 +1,16 @@
-package SoftveroveInzinierstvoTim5.RestAPI.model;
+package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Account {
-
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
-
- private int person_id_person;
- private int company_id_company;
- private int study_program_idstudy_program;
- private int id_account;
- private String email_address;
- private String password;
- private String role;
- private String study_level;
- private String signup_year;
- private String institute;
-
- public Account() {
-    
- }
+public class AccountDTO {
+    private int person_id_person;
+    private int company_id_company;
+    private int study_program_idstudy_program;
+    private int id_account;
+    private String email_address;
+    private String password;
+    private String role;
+    private String study_level;
+    private String signup_year;
+    private String institute;
 
     public int getPerson_id_person() {
         return this.person_id_person;
@@ -107,6 +90,6 @@ public class Account {
 
     public void setInstitute(String institute) {
         this.institute = institute;
-    }
+    }    
 
 }

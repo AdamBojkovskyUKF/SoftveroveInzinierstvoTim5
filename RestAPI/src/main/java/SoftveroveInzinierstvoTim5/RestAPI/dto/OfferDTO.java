@@ -1,27 +1,11 @@
-package SoftveroveInzinierstvoTim5.RestAPI.model;
+package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Offer {
-
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class OfferDTO {
  private int id_offer;
- @Id
  private int person_id_person;
  private String position;
  private String description;
  private String contract_type;
-
- public Offer() {
- }
 
     public int getId_offer() {
         return this.id_offer;

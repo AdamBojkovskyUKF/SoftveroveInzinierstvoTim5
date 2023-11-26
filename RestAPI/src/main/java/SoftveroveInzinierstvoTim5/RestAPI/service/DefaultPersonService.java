@@ -53,6 +53,7 @@ public class DefaultPersonService implements PersonService {
         personData.setSurname(person.getSurname());
         personData.setEmail(person.getEmail());
         personData.setPhone_number(person.getPhone_number());
+        personData.setAddress(person.getAddress());
         return personData;
     }
 
@@ -62,6 +63,7 @@ public class DefaultPersonService implements PersonService {
         person.setSurname(personData.getSurname());
         person.setEmail(personData.getEmail());
         person.setPhone_number(personData.getPhone_number());
+        person.setAddress(personData.getAddress());
         return person;
     }
 }

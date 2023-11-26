@@ -1,21 +1,8 @@
-package SoftveroveInzinierstvoTim5.RestAPI.model;
+package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
-
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Study_Program {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class Study_ProgramDTO {
     private int idstudy_program;
-    
     private String name;
-
-    public Study_Program() {
-    }
 
     public int getIdstudy_program() {
         return this.idstudy_program;
@@ -32,5 +19,5 @@ public class Study_Program {
     public void setName(String name) {
         this.name = name;
     }
-    
+
 }
