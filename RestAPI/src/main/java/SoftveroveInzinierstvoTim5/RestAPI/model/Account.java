@@ -24,6 +24,7 @@ public class Account {
  private String role;
  private String study_level;
  private String signup_year;
+ private String institute;
 
  public Account() {
     
@@ -110,5 +111,3 @@ public class Account {
     }
 
  }
-
-}

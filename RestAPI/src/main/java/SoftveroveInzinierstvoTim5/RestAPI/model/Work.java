@@ -21,6 +21,7 @@ public class Work {
  private String feedback_student;
  private String feedback_company;
  private String mark;
+ private String completion_year;
 
  public Work() {
  }
