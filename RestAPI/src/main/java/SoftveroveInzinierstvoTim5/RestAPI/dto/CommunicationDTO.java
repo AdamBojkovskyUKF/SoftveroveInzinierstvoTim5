@@ -1,23 +1,9 @@
-package SoftveroveInzinierstvoTim5.RestAPI.model;
+package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
-
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Communication {
-
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
-
- private int account_id_account;
- private int account_id_account1;
- private String messages;
-
- public Communication() {
-    
- }
+public class CommunicationDTO {
+    private int account_id_account;
+    private int account_id_account1;
+    private String messages;
 
     public int getAccount_id_account() {
         return this.account_id_account;

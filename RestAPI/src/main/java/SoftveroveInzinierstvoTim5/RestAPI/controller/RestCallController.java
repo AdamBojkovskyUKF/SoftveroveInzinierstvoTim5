@@ -35,11 +35,12 @@ public class RestCallController {
         String firstName = faker.name().firstName();
         String lastName = faker.name().lastName();
         String streetAddress = faker.address().streetAddress();
-        p.setEmail(firstName+lastName+"@gmail.com");
+
         p.setName(firstName);
         p.setSurname(lastName);
         p.setAddress(streetAddress);
-        p.setPhone_number("123456789");
+        p.setPhone_number("+421912345678");
+        p.setEmail(firstName+lastName+"@gmail.com");
         personService.savePerson(p);
     }
         return "Data Loaded";
@@ -50,5 +51,4 @@ public class RestCallController {
         return "Login Successful";
     }
 
-    
 }

@@ -76,5 +76,4 @@ public class Person {
         this.email = email;
     }
 
- //get & set methods
 }

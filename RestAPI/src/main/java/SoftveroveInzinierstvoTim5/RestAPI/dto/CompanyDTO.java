@@ -1,24 +1,10 @@
-package SoftveroveInzinierstvoTim5.RestAPI.model;
+package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
-import org.hibernate.annotations.ForeignKey;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
-
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Company {
-
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class CompanyDTO {
  private int id_company;
- @Id
  private int representative_id_person;
  private String name;
  private String address;
-
- public Company() {
- }
 
     public int getId_company() {
         return this.id_company;
@@ -51,5 +37,5 @@ public class Company {
     public void setAddress(String address) {
         this.address = address;
     }
-  
+
 }
