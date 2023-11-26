@@ -13,6 +13,8 @@ public class Work {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
+ private String id_work;
+ @Id
  private int offer_id_offer;
  private int account_id_account;
  private String contract;

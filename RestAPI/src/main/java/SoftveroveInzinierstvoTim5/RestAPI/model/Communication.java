@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Communication {
-
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private int account_id_account;

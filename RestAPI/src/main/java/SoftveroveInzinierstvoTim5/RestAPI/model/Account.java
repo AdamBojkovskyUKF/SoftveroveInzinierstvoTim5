@@ -13,6 +13,7 @@ public class Account {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
+
  private int person_id_person;
  private int company_id_company;
  private int study_program_idstudy_program;

@@ -13,8 +13,9 @@ public class Report {
 
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
- private int account_id_account;
  private int idreport;
+ @Id
+ private int creatoraccount_id_account;
  private String type;
  private JSON content;
  private String timestamp;
