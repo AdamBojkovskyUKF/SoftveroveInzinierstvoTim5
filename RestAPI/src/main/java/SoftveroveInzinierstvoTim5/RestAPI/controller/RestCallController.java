@@ -34,12 +34,12 @@ public class RestCallController {
         Faker faker = new Faker();
         String firstName = faker.name().firstName();
         String lastName = faker.name().lastName();
-
         String streetAddress = faker.address().streetAddress();
         p.setEmail(firstName+lastName+"@gmail.com");
         p.setName(firstName);
         p.setSurname(lastName);
         p.setAddress(streetAddress);
+        p.setPhone_number("123456789");
         personService.savePerson(p);
     }
         return "Data Loaded";

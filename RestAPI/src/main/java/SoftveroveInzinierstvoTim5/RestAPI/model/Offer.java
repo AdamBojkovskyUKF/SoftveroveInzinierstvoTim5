@@ -18,6 +18,7 @@ public class Offer {
  private String contract_type;
 
  public Offer() {
+    
  }
 
  //get & set methods
