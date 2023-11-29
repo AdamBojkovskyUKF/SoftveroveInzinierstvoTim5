@@ -11,7 +11,6 @@ public class Report {
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private int idreport;
- @Id
  private int creatoraccount_id_account;
  private String type;
  private String content;

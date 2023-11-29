@@ -10,7 +10,6 @@ public class Subject_for_Practice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idsubject_for_practice;
-    @Id
     private int study_program_idstudy_program;
 
     private int credits;
