@@ -43,7 +43,7 @@ public class DefaultPersonService implements PersonService {
 
     @Override
     public PersonDTO getPersonById(final Integer personId) {
-        return populatePersonData(personRepository.findById(personId).orElseThrow(() -> new EntityNotFoundException("Customer not found")));
+        return populatePersonData(personRepository.findById(personId).orElseThrow(() -> new EntityNotFoundException("Person not found")));
     }
 
     private PersonDTO populatePersonData(final Person person) {
