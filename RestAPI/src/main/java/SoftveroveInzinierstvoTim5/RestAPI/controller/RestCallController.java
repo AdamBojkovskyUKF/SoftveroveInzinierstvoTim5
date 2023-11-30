@@ -42,6 +42,7 @@ public class RestCallController {
         }
         return people;
     }
+
     @GetMapping("/dataSeed")
     public String handleDataSeedRequest(){
         if (!personService.getAllPersons().isEmpty()) {
