@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.catalina.valves.JsonAccessLogValve;
 import org.json.*;
 
 @RestController
@@ -36,10 +37,14 @@ public class RestCallController {
     @Autowired
     DefaultAccountService accountService;
 
-    String[] roly = {"Admin","VeduciPracoviska","Student","PoverenyPracovnik","Zastupca"};
+    String[] roly = {"admin","veduci_pracoviska","student","povereny_pracovnik","zastupca_firmy"};
+
+    String[] institute = {"katedra_informatiky", "katedra_matematiky", "katedra_fyziky"};
 
     final String RESPONSECODE_OK = "200";
     final String RESPONSECODE_ERROR = "500";
+    final String RESPONSECODE_PERMISSION_DENIED = "1002";
+    final String RESPONSECODE_PERMISSION_GRANTED = "1001";
 
     @GetMapping("/test")
     public String handleTestRequest() {
@@ -70,7 +75,7 @@ public class RestCallController {
                 personService.savePerson(p);
             }
         }
-        if(!accountService.getAllAccounts().isEmpty()){
+        //if(!accountService.getAllAccounts().isEmpty()){
             for (int i = 0; i < 20; i++) {
                 AccountDTO acc = new AccountDTO();
                 Faker faker = new Faker();
@@ -79,17 +84,24 @@ public class RestCallController {
                 String streetAddress = faker.address().streetAddress();
 
                 acc.setEmail_address(firstName+lastName+"@gmail.com");
-                acc.setInstitute("placeholder");
+                acc.setInstitute(institute[faker.number().numberBetween(0, 2)]);
                 acc.setPassword("password");
                 acc.setStudy_level("placeholder");
                 acc.setSignup_year(faker.number().numberBetween(2000, 2030)+"");
                 acc.setRole(roly[faker.number().numberBetween(0, 4)]);
                 accountService.saveAccount(acc);
             }
-        }
+        //}
     
         return "Data Loaded";
     }
+
+
+    /**
+     * @apiNote prihlasovanie sa
+     * @param RequestBody
+     * @return
+     */
     @GetMapping(value = "/login")
     public String handleLoginRequest(@RequestBody String RequestBody){
         JSONObject json = new JSONObject(RequestBody);
@@ -113,20 +125,40 @@ public class RestCallController {
         return responseObject.toString();
     }
 
+    /**
+     * @apiNote zobrazovanie firiem
+     * @param requestString
+     * @return
+     */
     @GetMapping("/zobrazFirmy")
-    public String zobrazFirmy() {
+    public String zobrazFirmy(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int id = json.getInt("account_id");
+        AccountDTO acc = accountService.getAccountId(id);
+        JSONObject responseObject = new JSONObject();
+
         List <CompanyDTO> companies = companyService.getAllCompanies();
-        StringBuilder companiesString = new StringBuilder();
-        for (CompanyDTO companyDTO : companies) {
-            PersonDTO representative = personService.getPersonById(companyDTO.getRepresentative_id_person());
+        JSONArray companiesArray = new JSONArray();
 
-            companiesString.append("Názov: ").append(companyDTO.getName())
-                    .append(" Adresa: ").append(companyDTO.getAddress())
-                    .append(" Zástupca firmy: ").append(representative != null ? representative.getName() + " " + representative.getSurname() : "Neznámy zástupca firmy")
-                    .append("\n");
+        if(acc.getRole().equals("admin") || acc.getRole().equals("veduci_pracoviska") || acc.getRole().equals("povereny_pracovnik")) {
+            for (CompanyDTO companyDTO : companies) {
+                JSONObject companyJson = new JSONObject();
+                PersonDTO representative = personService.getPersonById(companyDTO.getRepresentative_id_person());
+
+                companyJson.put("Názov: ", companyDTO.getName());
+                companyJson.put(" Adresa: ", companyDTO.getAddress());
+                companyJson.put(" Meno: ", representative.getName());
+                companyJson.put(" Priezvisko: ", representative.getSurname());
+
+                companiesArray.put(companyJson);
+            }
+
+            return companiesArray.toString();
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu firiem.");
+
+            return responseObject.toString();
         }
-        
-        return companiesString.toString();
     }
-
 }
