@@ -46,6 +46,11 @@ public class DefaultAccountService implements AccountService{
     public AccountDTO getAccountId(Integer id_account) {
         return populateAccountData(accountRepository.findById(id_account).orElseThrow(() -> new EntityNotFoundException("Account not found")));
     }
+
+    public AccountDTO getAccountWithId(Integer id_account) {
+        return populateAccountData(accountRepository.findById(id_account).orElseThrow(() -> new EntityNotFoundException("Account not found")));
+    
+    }
     
     private AccountDTO populateAccountData(final Account account) {
         AccountDTO accountData = new AccountDTO();
