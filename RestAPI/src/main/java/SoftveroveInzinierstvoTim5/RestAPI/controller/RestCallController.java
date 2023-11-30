@@ -65,7 +65,7 @@ public class RestCallController {
 
     @GetMapping("/dataSeed")
     public String handleDataSeedRequest(){
-        //if (!personService.getAllPersons().isEmpty()) {
+        if (!personService.getAllPersons().isEmpty()) {
             for (int i = 0; i < 20; i++) {
                 PersonDTO p = new PersonDTO();
                 Faker faker = new Faker();
@@ -80,8 +80,8 @@ public class RestCallController {
                 p.setEmail(firstName+lastName+"@gmail.com");
                 personService.savePerson(p);
             }
-        //}
-        if(!accountService.getAllAccounts().isEmpty()){
+        }
+        //if(!accountService.getAllAccounts().isEmpty()){
             for (int i = 0; i < 20; i++) {
                 AccountDTO acc = new AccountDTO();
                 Faker faker = new Faker();
@@ -97,7 +97,7 @@ public class RestCallController {
                 acc.setRole(roly[faker.number().numberBetween(0, 4)]);
                 accountService.saveAccount(acc);
             }
-        }
+        //}
     
         return "Data Loaded";
     }
@@ -190,14 +190,13 @@ public class RestCallController {
                 AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
                 PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
                 OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                AccountDTO overseerAcc = accountService.getAccountId(offer.getOverseer_id_person());
-                CompanyDTO company = companyService.getCompanyId(overseerAcc.getCompany_id_company());
+                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
 
                 studentWork.put("Meno: ", studentPerson.getName());
                 studentWork.put(" Priezvisko: ", studentPerson.getSurname());
                 studentWork.put(" Firma: ", company.getName());
                 studentWork.put(" Stav: ", workDTO.getState());
-                
+                                
                 studentWorkArray.put(studentWork);
             }
 
@@ -231,8 +230,7 @@ public class RestCallController {
                 AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
                 PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
                 OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                AccountDTO overseerAcc = accountService.getAccountId(offer.getOverseer_id_person());
-                CompanyDTO company = companyService.getCompanyId(overseerAcc.getCompany_id_company());
+                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
 
                 if(workDTO.getState().equals("schvalena") || workDTO.getState().equals("ukoncena")) {
                     studentWork.put("Meno: ", studentPerson.getName());
@@ -271,8 +269,7 @@ public class RestCallController {
                 AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
                 PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
                 OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                AccountDTO overseerAcc = accountService.getAccountId(offer.getOverseer_id_person());
-                CompanyDTO company = companyService.getCompanyId(overseerAcc.getCompany_id_company());
+                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
 
                 if(studentAcc.getInstitute().equals(institut)) {
                     studentWork.put("Meno: ", studentPerson.getName());
