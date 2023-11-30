@@ -168,6 +168,11 @@ public class RestCallController {
         }
     }
 
+    /**
+     * @apiNote zobrazovanie studentov na praxi
+     * @param requestString
+     * @return
+     */
     @GetMapping("/zobrazStudentovNaPraxi")
     public String zobrazStudentovNaPraxi(@RequestBody String requestString) {
         JSONObject json = new JSONObject(requestString);
@@ -191,8 +196,52 @@ public class RestCallController {
                 studentWork.put("Meno: ", studentPerson.getName());
                 studentWork.put(" Priezvisko: ", studentPerson.getSurname());
                 studentWork.put(" Firma: ", company.getName());
+                studentWork.put(" Stav: ", workDTO.getState());
                 
                 studentWorkArray.put(studentWork);
+            }
+
+            return studentWorkArray.toString();
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi.");
+
+            return responseObject.toString();
+        }
+    }
+    /**
+     * @apiNote zobrazovanie schvalenych a ukoncenych praxi
+     * @param requestString
+     * @return
+     */
+    @GetMapping("/zobrazSchvaleneUkoncenePraxe")
+    public String zobrazSchvaleneUkoncenePraxe(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int id = json.getInt("account_id");
+        AccountDTO acc = accountService.getAccountId(id);
+
+        List<WorkDTO> works = workService.getAllWorks();
+        JSONArray studentWorkArray = new JSONArray();
+
+        JSONObject responseObject = new JSONObject();
+
+        if(acc.getRole().equals("veduci_pracoviska")) {
+            for (WorkDTO workDTO : works) {
+                JSONObject studentWork = new JSONObject();
+                AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
+                PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
+                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                AccountDTO overseerAcc = accountService.getAccountId(offer.getOverseer_id_person());
+                CompanyDTO company = companyService.getCompanyId(overseerAcc.getCompany_id_company());
+
+                if(workDTO.getState().equals("schvalena") || workDTO.getState().equals("ukoncena")) {
+                    studentWork.put("Meno: ", studentPerson.getName());
+                    studentWork.put(" Priezvisko: ", studentPerson.getSurname());
+                    studentWork.put(" Firma: ", company.getName());
+                    studentWork.put(" Stav: ", workDTO.getState());
+
+                    studentWorkArray.put(studentWork);
+                }
             }
 
             return studentWorkArray.toString();
