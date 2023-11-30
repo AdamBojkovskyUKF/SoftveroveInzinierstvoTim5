@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.Study_ProgramDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Study_Program;
@@ -11,6 +13,8 @@ import SoftveroveInzinierstvoTim5.RestAPI.repository.Study_ProgramRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Subgraph;
 
+@Service
+@Configurable
 public class DefaultStudy_ProgramService implements Study_ProgramService{
 
     @Autowired

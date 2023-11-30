@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.AccountDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Account;
 import SoftveroveInzinierstvoTim5.RestAPI.repository.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
+@Configurable
 public class DefaultAccountService implements AccountService{
 
     @Autowired

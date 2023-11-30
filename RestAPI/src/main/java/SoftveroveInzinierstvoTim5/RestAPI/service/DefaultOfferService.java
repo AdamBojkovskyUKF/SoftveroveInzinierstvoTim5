@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.OfferDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Offer;
 import SoftveroveInzinierstvoTim5.RestAPI.repository.OfferRepository;
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
+@Configurable
 public class DefaultOfferService implements OfferService{
 
     @Autowired

@@ -8,8 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.CompanyDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Company;
 import SoftveroveInzinierstvoTim5.RestAPI.repository.CompanyRepository;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
+
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
+@Configurable
 public class DefaultCompanyService implements CompanyService{
 
     @Autowired

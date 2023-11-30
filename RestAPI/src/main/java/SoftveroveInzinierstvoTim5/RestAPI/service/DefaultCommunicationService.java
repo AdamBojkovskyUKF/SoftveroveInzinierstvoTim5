@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.CommunicationDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Communication;
 import SoftveroveInzinierstvoTim5.RestAPI.repository.CommunicationRepository;
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
+@Configurable
 public class DefaultCommunicationService implements CommunicationService{
 
     @Autowired

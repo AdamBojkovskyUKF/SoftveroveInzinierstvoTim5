@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.Subject_For_PracticeDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Subject_for_Practice;
 import SoftveroveInzinierstvoTim5.RestAPI.repository.Subject_For_PracticeRepository;
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
+@Configurable
 public class DefaultSubject_For_PracticeService implements Subject_For_PracticeService{
 
     @Autowired
