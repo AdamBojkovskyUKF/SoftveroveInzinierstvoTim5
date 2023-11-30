@@ -247,7 +247,48 @@ public class RestCallController {
             return studentWorkArray.toString();
         } else {
             responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi.");
+            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu schválených a ukončených praxí študentov.");
+
+            return responseObject.toString();
+        }
+    }
+
+    @GetMapping("/zobrazStudentovNaPraxiPodlaKatedry")
+    public String zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int id = json.getInt("account_id");
+        String institut = json.getString("institute");
+        AccountDTO acc = accountService.getAccountId(id);
+        
+        List<WorkDTO> works = workService.getAllWorks();
+        JSONArray studentWorkArray = new JSONArray();
+
+        JSONObject responseObject = new JSONObject();
+        
+        if(acc.getRole().equals("veduci_pracoviska")) {
+            for (WorkDTO workDTO : works) {
+                JSONObject studentWork = new JSONObject();
+                AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
+                PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
+                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                AccountDTO overseerAcc = accountService.getAccountId(offer.getOverseer_id_person());
+                CompanyDTO company = companyService.getCompanyId(overseerAcc.getCompany_id_company());
+
+                if(studentAcc.getInstitute().equals(institut)) {
+                    studentWork.put("Meno: ", studentPerson.getName());
+                    studentWork.put(" Priezvisko: ", studentPerson.getSurname());
+                    studentWork.put(" Firma: ", company.getName());
+                    studentWork.put(" Stav: ", workDTO.getState());
+                    studentWork.put(" Katedra: ", studentAcc.getInstitute());
+                    
+                    studentWorkArray.put(studentWork);
+                }
+            }
+
+            return studentWorkArray.toString();
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.");
 
             return responseObject.toString();
         }
