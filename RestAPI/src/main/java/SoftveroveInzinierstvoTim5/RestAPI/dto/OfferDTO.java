@@ -2,7 +2,7 @@ package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
 public class OfferDTO {
  private int id_offer;
- private int overseer_id_person;
+ private Integer overseer_id_person;
  private int company_id_company;
  private String position;
  private String description;
@@ -16,11 +16,11 @@ public class OfferDTO {
         this.id_offer = id_offer;
     }
 
-    public int getOverseer_id_person() {
+    public Integer getOverseer_id_person() {
         return this.overseer_id_person;
     }
 
-    public void setOverseer_id_person(int overseer_id_person) {
+    public void setOverseer_id_person(Integer overseer_id_person) {
         this.overseer_id_person = overseer_id_person;
     }
 
