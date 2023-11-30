@@ -2,6 +2,7 @@ package SoftveroveInzinierstvoTim5.RestAPI.model;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,8 +13,8 @@ public class Account {
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private int id_account;
  private Integer person_id_person;
- private int company_id_company;
- private int study_program_idstudy_program;
+ private Integer company_id_company;
+ private Integer study_program_idstudy_program;
 
 
  private String email_address;
@@ -27,36 +28,36 @@ public class Account {
     
  }
 
-    public int getPerson_id_person() {
-        return this.person_id_person;
-    }
-
-    public void setPerson_id_person(int person_id_person) {
-        this.person_id_person = person_id_person;
-    }
-
-    public int getCompany_id_company() {
-        return this.company_id_company;
-    }
-
-    public void setCompany_id_company(int company_id_company) {
-        this.company_id_company = company_id_company;
-    }
-
-    public int getStudy_program_idstudy_program() {
-        return this.study_program_idstudy_program;
-    }
-
-    public void setStudy_program_idstudy_program(int study_program_idstudy_program) {
-        this.study_program_idstudy_program = study_program_idstudy_program;
-    }
-
     public int getId_account() {
         return this.id_account;
     }
 
     public void setId_account(int id_account) {
         this.id_account = id_account;
+    }
+
+    public Integer getPerson_id_person() {
+        return this.person_id_person;
+    }
+
+    public void setPerson_id_person(Integer person_id_person) {
+        this.person_id_person = person_id_person;
+    }
+
+    public Integer getCompany_id_company() {
+        return this.company_id_company;
+    }
+
+    public void setCompany_id_company(Integer company_id_company) {
+        this.company_id_company = company_id_company;
+    }
+
+    public Integer getStudy_program_idstudy_program() {
+        return this.study_program_idstudy_program;
+    }
+
+    public void setStudy_program_idstudy_program(Integer study_program_idstudy_program) {
+        this.study_program_idstudy_program = study_program_idstudy_program;
     }
 
     public String getEmail_address() {
@@ -106,5 +107,6 @@ public class Account {
     public void setInstitute(String institute) {
         this.institute = institute;
     }
+    
 
  }

@@ -11,14 +11,14 @@ public class Offer {
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private int id_offer;
- private int person_id_person;
+ private int overseer_id_person;
  private String position;
  private String description;
  private String contract_type;
 
  public Offer() {
  }
-
+ 
     public int getId_offer() {
         return this.id_offer;
     }
@@ -27,12 +27,12 @@ public class Offer {
         this.id_offer = id_offer;
     }
 
-    public int getPerson_id_person() {
-        return this.person_id_person;
+    public int getOverseer_id_person() {
+        return this.overseer_id_person;
     }
 
-    public void setPerson_id_person(int person_id_person) {
-        this.person_id_person = person_id_person;
+    public void setOverseer_id_person(int overseer_id_person) {
+        this.overseer_id_person = overseer_id_person;
     }
 
     public String getPosition() {
@@ -58,5 +58,6 @@ public class Offer {
     public void setContract_type(String contract_type) {
         this.contract_type = contract_type;
     }
+    
     
  }

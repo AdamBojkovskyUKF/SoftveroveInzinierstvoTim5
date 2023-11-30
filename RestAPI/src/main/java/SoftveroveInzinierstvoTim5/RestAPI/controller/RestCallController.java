@@ -14,11 +14,14 @@ import SoftveroveInzinierstvoTim5.RestAPI.dto.AccountDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.PersonDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.WorkDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.CompanyDTO;
+import SoftveroveInzinierstvoTim5.RestAPI.dto.OfferDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Person;
+import SoftveroveInzinierstvoTim5.RestAPI.model.Work;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultAccountService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultPersonService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultWorkService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultCompanyService;
+import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultOfferService;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +36,12 @@ public class RestCallController {
     DefaultPersonService personService;
     @Autowired
     DefaultCompanyService companyService;
-
     @Autowired
     DefaultAccountService accountService;
+    @Autowired
+    DefaultWorkService workService;
+    @Autowired
+    DefaultOfferService offerService;
 
     String[] roly = {"admin","veduci_pracoviska","student","povereny_pracovnik","zastupca_firmy"};
 
@@ -59,7 +65,7 @@ public class RestCallController {
 
     @GetMapping("/dataSeed")
     public String handleDataSeedRequest(){
-        if (!personService.getAllPersons().isEmpty()) {
+        //if (!personService.getAllPersons().isEmpty()) {
             for (int i = 0; i < 20; i++) {
                 PersonDTO p = new PersonDTO();
                 Faker faker = new Faker();
@@ -74,8 +80,8 @@ public class RestCallController {
                 p.setEmail(firstName+lastName+"@gmail.com");
                 personService.savePerson(p);
             }
-        }
-        //if(!accountService.getAllAccounts().isEmpty()){
+        //}
+        if(!accountService.getAllAccounts().isEmpty()){
             for (int i = 0; i < 20; i++) {
                 AccountDTO acc = new AccountDTO();
                 Faker faker = new Faker();
@@ -91,7 +97,7 @@ public class RestCallController {
                 acc.setRole(roly[faker.number().numberBetween(0, 4)]);
                 accountService.saveAccount(acc);
             }
-        //}
+        }
     
         return "Data Loaded";
     }
@@ -157,6 +163,42 @@ public class RestCallController {
         } else {
             responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
             responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu firiem.");
+
+            return responseObject.toString();
+        }
+    }
+
+    @GetMapping("/zobrazStudentovNaPraxi")
+    public String zobrazStudentovNaPraxi(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int id = json.getInt("account_id");
+        AccountDTO acc = accountService.getAccountId(id);
+        
+        List<WorkDTO> works = workService.getAllWorks();
+        JSONArray studentWorkArray = new JSONArray();
+
+        JSONObject responseObject = new JSONObject();
+        
+        if(acc.getRole().equals("veduci_pracoviska")) {
+            for (WorkDTO workDTO : works) {
+                JSONObject studentWork = new JSONObject();
+                AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
+                PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
+                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                AccountDTO overseerAcc = accountService.getAccountId(offer.getOverseer_id_person());
+                CompanyDTO company = companyService.getCompanyId(overseerAcc.getCompany_id_company());
+
+                studentWork.put("Meno: ", studentPerson.getName());
+                studentWork.put(" Priezvisko: ", studentPerson.getSurname());
+                studentWork.put(" Firma: ", company.getName());
+                
+                studentWorkArray.put(studentWork);
+            }
+
+            return studentWorkArray.toString();
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi.");
 
             return responseObject.toString();
         }

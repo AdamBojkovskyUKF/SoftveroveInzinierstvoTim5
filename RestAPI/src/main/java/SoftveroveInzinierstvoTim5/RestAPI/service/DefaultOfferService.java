@@ -48,7 +48,7 @@ public class DefaultOfferService implements OfferService{
 
     private OfferDTO populateOfferData(final Offer offer) {
         OfferDTO offerData = new OfferDTO();
-        offerData.setPerson_id_person(offer.getPerson_id_person());
+        offerData.setOverseer_id_person(offer.getOverseer_id_person());
         offerData.setPosition(offer.getPosition());
         offerData.setDescription(offer.getDescription());
         offerData.setContract_type(offer.getContract_type());
@@ -57,7 +57,7 @@ public class DefaultOfferService implements OfferService{
 
     private Offer populateOfferEntity(OfferDTO offerData) {
         Offer offer = new Offer();
-        offer.setPerson_id_person(offerData.getPerson_id_person());
+        offer.setOverseer_id_person(offerData.getOverseer_id_person());
         offer.setPosition(offerData.getPosition());
         offer.setDescription(offerData.getDescription());
         offer.setContract_type(offerData.getDescription());

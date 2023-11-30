@@ -2,8 +2,8 @@ package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
 public class AccountDTO {
     private int person_id_person;
-    private int company_id_company;
-    private int study_program_idstudy_program;
+    private Integer company_id_company;
+    private Integer study_program_idstudy_program;
     private int id_account;
     private String email_address;
     private String password;
@@ -20,19 +20,19 @@ public class AccountDTO {
         this.person_id_person = person_id_person;
     }
 
-    public int getCompany_id_company() {
+    public Integer getCompany_id_company() {
         return this.company_id_company;
     }
 
-    public void setCompany_id_company(int company_id_company) {
+    public void setCompany_id_company(Integer company_id_company) {
         this.company_id_company = company_id_company;
     }
 
-    public int getStudy_program_idstudy_program() {
+    public Integer getStudy_program_idstudy_program() {
         return this.study_program_idstudy_program;
     }
 
-    public void setStudy_program_idstudy_program(int study_program_idstudy_program) {
+    public void setStudy_program_idstudy_program(Integer study_program_idstudy_program) {
         this.study_program_idstudy_program = study_program_idstudy_program;
     }
 
@@ -90,6 +90,6 @@ public class AccountDTO {
 
     public void setInstitute(String institute) {
         this.institute = institute;
-    }    
-
+    }
+     
 }
