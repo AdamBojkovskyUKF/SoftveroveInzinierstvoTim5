@@ -54,6 +54,7 @@ public class DefaultAccountService implements AccountService{
     
     private AccountDTO populateAccountData(final Account account) {
         AccountDTO accountData = new AccountDTO();
+        accountData.setId_account(account.getId_account());
         accountData.setCompany_id_company(account.getCompany_id_company());
         accountData.setEmail_address(account.getEmail_address());
         accountData.setInstitute(account.getInstitute());
@@ -67,6 +68,7 @@ public class DefaultAccountService implements AccountService{
 
     private Account populateAccountEntity(AccountDTO accountData) {
         Account account = new Account();
+        account.setId_account(accountData.getId_account());
         account.setCompany_id_company(accountData.getCompany_id_company());
         account.setEmail_address(accountData.getEmail_address());
         account.setInstitute(accountData.getInstitute());

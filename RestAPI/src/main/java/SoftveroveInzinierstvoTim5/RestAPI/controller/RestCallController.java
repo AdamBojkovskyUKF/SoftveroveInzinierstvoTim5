@@ -383,4 +383,39 @@ public class RestCallController {
             return responseObject.toString();
         }
     }
+
+    @PostMapping("/priradPoverenehoPracovnika")
+    public String priradPoverenehoPracovnika(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int id = json.getInt("account_id");
+        int id_offer = json.getInt("offer_id");
+        int overseer_id_person = json.getInt("person_id");
+
+        AccountDTO acc = accountService.getAccountId(id);
+
+        JSONObject responseObject = new JSONObject();
+
+        if(acc.getRole().equals("veduci_pracoviska")) {
+            OfferDTO offer = offerService.getOfferId(id_offer);
+            if(offer.getOverseer_id_person() != null) {
+                responseObject.put("response_code", RESPONSECODE_ERROR);
+                responseObject.put("responseMessage", "Zadaná ponuka už má prideleného povereného pracovníka katedry.");
+
+                return responseObject.toString();
+            } else {
+                offer.setOverseer_id_person(overseer_id_person);
+                offerService.saveOffer(offer);
+
+                responseObject.put("response_code", RESPONSECODE_OK);
+                responseObject.put("responseMessage", "Úspešne si priradil povereného pracovníka katedry danej pracovnej ponuke.");
+
+                return responseObject.toString();
+            }
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš povolenie priraďovať poverených pracovníkov katedier k ponukám práce.");
+
+            return responseObject.toString();
+        }
+    }
 }
