@@ -338,4 +338,49 @@ public class RestCallController {
             return responseObject.toString();
         }
     }
+
+    /**
+     * @apiNote zobrazovanie spatnych vazieb zastupcu zadanej firmy
+     * @param requestString
+     * @return
+     */
+    @GetMapping("/zobrazSpatneVazbyZastupcuFirmy")
+    public String zobrazSpatneVazbyZastupcuFirmy(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int id = json.getInt("account_id");
+        String menoFirmy = json.getString("meno_firmy");
+        AccountDTO acc = accountService.getAccountId(id);
+        List<WorkDTO> works = workService.getAllWorks();
+
+        JSONObject responseObject = new JSONObject();
+        JSONArray feedbackCompanyArray = new JSONArray();
+
+        if(acc.getRole().equals("veduci_pracoviska")) {
+            for (WorkDTO workDTO : works) {
+                JSONObject feedbackCompany = new JSONObject();
+                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+                PersonDTO person = personService.getPersonById(company.getRepresentative_id_person());
+                AccountDTO account = accountService.getAccountId(workDTO.getAccount_id_account());
+                PersonDTO studentPerson = personService.getPersonById(account.getPerson_id_person());
+
+                if(company.getName().equals(menoFirmy)) {
+                    feedbackCompany.put(" Zástupca Meno: ", person.getName());
+                    feedbackCompany.put(" Zástupca Priezvisko: ", person.getSurname());
+                    feedbackCompany.put(" Študent Meno: ", studentPerson.getName());
+                    feedbackCompany.put(" Študent priezvisko: ", studentPerson.getSurname());
+                    feedbackCompany.put(" Spätná väzba: ", workDTO.getFeedback_company());
+
+                    feedbackCompanyArray.put(feedbackCompany);
+                }
+            }
+
+            return feedbackCompanyArray.toString();
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie spätných väzieb zástupcu firmy.");
+
+            return responseObject.toString();
+        }
+    }
 }
