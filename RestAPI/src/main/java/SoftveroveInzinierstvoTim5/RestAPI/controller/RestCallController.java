@@ -12,6 +12,7 @@ import com.github.javafaker.Faker;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.AccountDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.PersonDTO;
+import SoftveroveInzinierstvoTim5.RestAPI.dto.ReportDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.WorkDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.CompanyDTO;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.OfferDTO;
@@ -19,6 +20,7 @@ import SoftveroveInzinierstvoTim5.RestAPI.model.Person;
 import SoftveroveInzinierstvoTim5.RestAPI.model.Work;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultAccountService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultPersonService;
+import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultReportService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultWorkService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultCompanyService;
 import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultOfferService;
@@ -42,6 +44,8 @@ public class RestCallController {
     DefaultWorkService workService;
     @Autowired
     DefaultOfferService offerService;
+    @Autowired
+    DefaultReportService reportService;
 
     String[] roly = {"admin","veduci_pracoviska","student","povereny_pracovnik","zastupca_firmy"};
 
@@ -65,7 +69,7 @@ public class RestCallController {
 
     @GetMapping("/dataSeed")
     public String handleDataSeedRequest(){
-        if (!personService.getAllPersons().isEmpty()) {
+        //if (!personService.getAllPersons().isEmpty()) {
             for (int i = 0; i < 20; i++) {
                 PersonDTO p = new PersonDTO();
                 Faker faker = new Faker();
@@ -80,7 +84,7 @@ public class RestCallController {
                 p.setEmail(firstName+lastName+"@gmail.com");
                 personService.savePerson(p);
             }
-        }
+        //}
         //if(!accountService.getAllAccounts().isEmpty()){
             for (int i = 0; i < 20; i++) {
                 AccountDTO acc = new AccountDTO();
@@ -251,6 +255,11 @@ public class RestCallController {
         }
     }
 
+    /**
+     * @apiNote zobrazovanie studentov na praxi podla zvolenej katedry
+     * @param requestString
+     * @return
+     */
     @GetMapping("/zobrazStudentovNaPraxiPodlaKatedry")
     public String zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
         JSONObject json = new JSONObject(requestString);
@@ -286,6 +295,45 @@ public class RestCallController {
         } else {
             responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
             responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.");
+
+            return responseObject.toString();
+        }
+    }
+
+    /**
+     * @apiNote vytvorenie reportu za pracovisko
+     * @param requestString
+     * @return
+     */
+    @PostMapping("/vytvorReportZaPracovisko")
+    public String vytvorReportZaPracovisko(@RequestBody String requestString) {
+        JSONObject json = new JSONObject(requestString);
+        int accountId = json.getInt("account_id");
+        AccountDTO acc = accountService.getAccountId(accountId);
+
+        JSONObject responseObject = new JSONObject();
+
+        if (acc.getRole().equals("veduci_pracoviska")) {
+            JSONObject contentJson = json.getJSONObject("content");
+            String timestamp = json.getString("timestamp");
+            String type = json.getString("type");
+
+            ReportDTO newReport = new ReportDTO();
+
+            newReport.setCreatoraccount_id_account(accountId);
+            newReport.setContent(contentJson.toString());
+            newReport.setTimestamp(timestamp);
+            newReport.setType(type);
+
+            reportService.saveReport(newReport);
+
+            responseObject.put("response_code", RESPONSECODE_OK);
+            responseObject.put("responseMessage", "Report úspešne vytvorený.");
+
+            return responseObject.toString();
+        } else {
+            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+            responseObject.put("responseMessage", "Nemáš povolenie pre vytváranie reportu za pracovisko.");
 
             return responseObject.toString();
         }
