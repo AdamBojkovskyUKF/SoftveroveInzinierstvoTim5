@@ -2,34 +2,21 @@ package SoftveroveInzinierstvoTim5.RestAPI.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.github.javafaker.Faker;
 
-import SoftveroveInzinierstvoTim5.RestAPI.dto.AccountDTO;
-import SoftveroveInzinierstvoTim5.RestAPI.dto.PersonDTO;
-import SoftveroveInzinierstvoTim5.RestAPI.dto.ReportDTO;
-import SoftveroveInzinierstvoTim5.RestAPI.dto.WorkDTO;
-import SoftveroveInzinierstvoTim5.RestAPI.dto.CompanyDTO;
-import SoftveroveInzinierstvoTim5.RestAPI.dto.OfferDTO;
-import SoftveroveInzinierstvoTim5.RestAPI.model.Person;
-import SoftveroveInzinierstvoTim5.RestAPI.model.Work;
-import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultAccountService;
-import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultPersonService;
-import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultReportService;
-import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultWorkService;
-import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultCompanyService;
-import SoftveroveInzinierstvoTim5.RestAPI.service.DefaultOfferService;
+import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
+import SoftveroveInzinierstvoTim5.RestAPI.model.*;
+import SoftveroveInzinierstvoTim5.RestAPI.service.*;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.catalina.valves.JsonAccessLogValve;
+import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 import org.json.*;
 
 @RestController
@@ -46,6 +33,12 @@ public class RestCallController {
     DefaultOfferService offerService;
     @Autowired
     DefaultReportService reportService;
+    @Autowired
+    DefaultStudy_ProgramService study_ProgramService;
+    @Autowired
+    DefaultSubject_For_PracticeService subject_For_PracticeService;
+    @Autowired
+    DefaultCommunicationService communicationService;
 
     String[] roly = {"admin","veduci_pracoviska","student","povereny_pracovnik","zastupca_firmy"};
 
@@ -102,11 +95,19 @@ public class RestCallController {
                 accountService.saveAccount(acc);
             }
         //}
+
+        AccountDTO adminAcc = new AccountDTO();
+        adminAcc.setEmail_address("admin@admin.com");
+        adminAcc.setInstitute("YoMama");
+        adminAcc.setPassword("admin");
+        adminAcc.setRole("admin");
+        adminAcc.setSignup_year("1234");
+        adminAcc.setStudy_level("1234");
+        accountService.saveAccount(adminAcc);
     
         return "Data Loaded";
     }
-
-
+    
     /**
      * @apiNote prihlasovanie sa
      * @param RequestBody
@@ -212,6 +213,7 @@ public class RestCallController {
             return responseObject.toString();
         }
     }
+    
     /**
      * @apiNote zobrazovanie schvalenych a ukoncenych praxi
      * @param requestString
@@ -415,6 +417,429 @@ public class RestCallController {
             responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
             responseObject.put("responseMessage", "Nemáš povolenie priraďovať poverených pracovníkov katedier k ponukám práce.");
 
+            return responseObject.toString();
+        }
+    }
+
+    /**
+     * @apiNote Direct create method for each class in DB
+     * @param entity request JSON
+     * @param classType type of class we want to create using CRUD
+     * @return error/success/permision_denied JSON
+     */
+    @PostMapping(value="/adminCRUD/create/{classType}")
+    public String createClass(@RequestBody String entity, @PathVariable String classType) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("admin")){
+                switch (classType) {
+                    case "account":
+                        AccountDTO accountDTO = new AccountDTO();
+                        accountDTO.setCompany_id_company(requestJsonObject.getInt("company_id"));
+                        accountDTO.setEmail_address(requestJsonObject.getString("email"));
+                        accountDTO.setInstitute(requestJsonObject.getString("institute"));
+                        accountDTO.setPassword(requestJsonObject.getString("password"));
+                        accountDTO.setPerson_id_person(requestJsonObject.getInt("person_id"));
+                        accountDTO.setRole(requestJsonObject.getString("role"));
+                        accountDTO.setSignup_year(requestJsonObject.getString("signup_year"));
+                        accountDTO.setStudy_level(requestJsonObject.getString("study_level"));
+                        accountDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("studyProgram_id"));
+                        accountService.saveAccount(accountDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Account.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "company":
+                        CompanyDTO companyDTO = new CompanyDTO();
+                        companyDTO.setAddress(requestJsonObject.getString("address"));
+                        companyDTO.setName(requestJsonObject.getString("name"));
+                        companyDTO.setRepresentative_id_person(requestJsonObject.getInt("representative_id"));
+                        companyService.saveCompany(companyDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Company.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "offer":
+                        OfferDTO offerDTO = new OfferDTO();
+                        offerDTO.setCompany_id_company(requestJsonObject.getInt("offer_id"));
+                        offerDTO.setContract_type(requestJsonObject.getString("offer_type"));
+                        offerDTO.setDescription(requestJsonObject.getString("description"));
+                        offerDTO.setOverseer_id_person(requestJsonObject.getInt("overseer_id"));
+                        offerDTO.setPosition(requestJsonObject.getString("position"));
+                        offerService.saveOffer(offerDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Offer.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "person":
+                        PersonDTO personDTO = new PersonDTO();
+                        personDTO.setAddress(requestJsonObject.getString("address"));
+                        personDTO.setEmail(requestJsonObject.getString("email"));
+                        personDTO.setName(requestJsonObject.getString("name"));
+                        personDTO.setPhone_number(requestJsonObject.getString("phone_number"));
+                        personDTO.setSurname(requestJsonObject.getString("surname"));
+                        personService.savePerson(personDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Person.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "report":
+                        ReportDTO reportDTO = new ReportDTO();
+                        reportDTO.setContent(requestJsonObject.getString("content"));
+                        reportDTO.setCreatoraccount_id_account(requestJsonObject.getInt("creator_id"));
+                        reportDTO.setTimestamp(requestJsonObject.getString("timestamp"));
+                        reportDTO.setType(requestJsonObject.getString("type"));
+                        reportService.saveReport(reportDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Report.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "study_program":
+                        Study_ProgramDTO study_ProgramDTO = new Study_ProgramDTO();
+                        study_ProgramDTO.setName(requestJsonObject.getString("name"));
+                        study_ProgramService.saveStudyProgram(study_ProgramDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Study_Program.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "subject_for_practice":
+                        Subject_For_PracticeDTO subject_For_PracticeDTO = new Subject_For_PracticeDTO();
+                        subject_For_PracticeDTO.setCredits(requestJsonObject.getInt("credits"));
+                        subject_For_PracticeDTO.setName(requestJsonObject.getString("name"));
+                        subject_For_PracticeDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("study_program_id"));
+                        subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "work":
+                        WorkDTO workDTO = new WorkDTO();
+                        workDTO.setAccount_id_account(requestJsonObject.getInt("work_account_id"));
+                        workDTO.setCompletion_year(requestJsonObject.getString("completion_year"));
+                        workDTO.setContract(requestJsonObject.getString("contract"));
+                        workDTO.setFeedback_company(requestJsonObject.getString("feedback_company"));
+                        workDTO.setFeedback_student(requestJsonObject.getString("feedback_student"));
+                        workDTO.setMark(requestJsonObject.getString("mark"));
+                        workDTO.setOffer_id_offer(requestJsonObject.getInt("offer_id"));
+                        workDTO.setState(requestJsonObject.getString("state"));
+                        workDTO.setWork_log(requestJsonObject.getString("work_log"));
+                        workService.saveWork(workDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Work.class.getName() + " instance created");
+                        return responseObject.toString();
+                    case "communication":
+                        CommunicationDTO communicationDTO =  new CommunicationDTO();
+                        communicationDTO.setAccount_id_account(requestJsonObject.getInt("account_1"));
+                        communicationDTO.setAccount_id_account1(requestJsonObject.getInt("account_2"));
+                        communicationDTO.setMessages(requestJsonObject.getString("messages"));
+                        communicationService.saveCommunication(communicationDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Communication.class.getName() + " instance created");
+                        return responseObject.toString();
+                    default:
+                        responseObject.put("response_code", RESPONSECODE_ERROR);
+                        responseObject.put("responseMessage", "Invalid class type");
+                        return responseObject.toString();
+                }
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie tried touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+
+    /**
+     * @apiNote Direct read method for each class in DB
+     * @param entity request JSON
+     * @param classType type of class we want to read using CRUD
+     * @return error/permission_denied JSON ... if successful will return JSON of class instance
+     */
+    @GetMapping(value="/adminCRUD/read/{classType}")
+    public String readClass(@RequestBody String entity, @PathVariable String classType) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("admin")){
+                switch (classType) {
+                    case "account":
+                        AccountDTO accountDTO = accountService.getAccountId(requestJsonObject.getInt("id"));
+                        JSONObject responseAccount = new JSONObject(accountDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseAccount);
+                        return responseObject.toString();
+                    case "company":
+                        CompanyDTO companyDTO = companyService.getCompanyId(requestJsonObject.getInt("id"));
+                        JSONObject responseCompany = new JSONObject(companyDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseCompany);
+                        return responseObject.toString();
+                    case "offer":
+                        OfferDTO offerDTO = offerService.getOfferId(requestJsonObject.getInt("id"));
+                        JSONObject responseOffer = new JSONObject(offerDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseOffer);
+                        return responseObject.toString();
+                    case "person":
+                        PersonDTO personDTO = personService.getPersonById(requestJsonObject.getInt("id"));
+                        JSONObject responsePerson = new JSONObject(personDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responsePerson);
+                        return responseObject.toString();
+                    case "report":
+                        ReportDTO reportDTO = reportService.getReportById(requestJsonObject.getInt("id"));
+                        JSONObject responseReport = new JSONObject(reportDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseReport);
+                        return responseObject.toString();
+                    case "study_program":
+                        Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(requestJsonObject.getInt("id"));
+                        JSONObject responseStudyProgram = new JSONObject(study_ProgramDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseStudyProgram);
+                        return responseObject.toString();
+                    case "subject_for_practice":
+                        Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(requestJsonObject.getInt("id"));
+                        JSONObject responseSubjectForPractice = new JSONObject(subject_For_PracticeDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseSubjectForPractice);
+                        return responseObject.toString();
+                    case "work":
+                        WorkDTO workDTO = workService.getWorkById(requestJsonObject.getInt("id"));
+                        JSONObject responseWork = new JSONObject(workDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseWork);
+                        return responseObject.toString();
+                    case "communication":
+                        CommunicationDTO communicationDTO = communicationService.getCommunicationId(requestJsonObject.getInt("id"));
+                        JSONObject responseCommunication = new JSONObject(communicationDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("object", responseCommunication);
+                        return responseObject.toString();
+                    default:
+                        responseObject.put("response_code", RESPONSECODE_ERROR);
+                        responseObject.put("responseMessage", "Invalid class type");
+                        return responseObject.toString();
+                }
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na čítanie tried touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+    
+    /**
+     * @apiNote Direct update method for each class in DB
+     * @param entity request JSON
+     * @param classType type of update we want to read using CRUD
+     * @return error/success/permision_denied JSON
+     */
+    @PostMapping(value="/adminCRUD/update/{classType}")
+    public String updateClass(@RequestBody String entity, @PathVariable String classType) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("admin")){
+                switch (classType) {
+                    case "account":
+                        AccountDTO accountDTO = accountService.getAccountId(requestJsonObject.getInt("id"));
+                        accountDTO.setCompany_id_company(requestJsonObject.getInt("company_id"));
+                        accountDTO.setEmail_address(requestJsonObject.getString("email"));
+                        accountDTO.setInstitute(requestJsonObject.getString("institute"));
+                        accountDTO.setPassword(requestJsonObject.getString("password"));
+                        accountDTO.setPerson_id_person(requestJsonObject.getInt("person_id"));
+                        accountDTO.setRole(requestJsonObject.getString("role"));
+                        accountDTO.setSignup_year(requestJsonObject.getString("signup_year"));
+                        accountDTO.setStudy_level(requestJsonObject.getString("study_level"));
+                        accountDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("studyProgram_id"));
+                        accountService.saveAccount(accountDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Account.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "company":
+                        CompanyDTO companyDTO = companyService.getCompanyId(requestJsonObject.getInt("id"));
+                        companyDTO.setAddress(requestJsonObject.getString("address"));
+                        companyDTO.setName(requestJsonObject.getString("name"));
+                        companyDTO.setRepresentative_id_person(requestJsonObject.getInt("representative_id"));
+                        companyService.saveCompany(companyDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Company.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "offer":
+                        OfferDTO offerDTO = offerService.getOfferId(requestJsonObject.getInt("id"));
+                        offerDTO.setCompany_id_company(requestJsonObject.getInt("offer_id"));
+                        offerDTO.setContract_type(requestJsonObject.getString("offer_type"));
+                        offerDTO.setDescription(requestJsonObject.getString("description"));
+                        offerDTO.setOverseer_id_person(requestJsonObject.getInt("overseer_id"));
+                        offerDTO.setPosition(requestJsonObject.getString("position"));
+                        offerService.saveOffer(offerDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Offer.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "person":
+                        PersonDTO personDTO = personService.getPersonById(requestJsonObject.getInt("id"));
+                        personDTO.setAddress(requestJsonObject.getString("address"));
+                        personDTO.setEmail(requestJsonObject.getString("email"));
+                        personDTO.setName(requestJsonObject.getString("name"));
+                        personDTO.setPhone_number(requestJsonObject.getString("phone_number"));
+                        personDTO.setSurname(requestJsonObject.getString("surname"));
+                        personService.savePerson(personDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Person.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "report":
+                        ReportDTO reportDTO = reportService.getReportById(requestJsonObject.getInt("id"));
+                        reportDTO.setContent(requestJsonObject.getString("content"));
+                        reportDTO.setCreatoraccount_id_account(requestJsonObject.getInt("creator_id"));
+                        reportDTO.setTimestamp(requestJsonObject.getString("timestamp"));
+                        reportDTO.setType(requestJsonObject.getString("type"));
+                        reportService.saveReport(reportDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Report.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "study_program":
+                        Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(requestJsonObject.getInt("id"));
+                        study_ProgramDTO.setName(requestJsonObject.getString("name"));
+                        study_ProgramService.saveStudyProgram(study_ProgramDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Study_Program.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "subject_for_practice":
+                        Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(requestJsonObject.getInt("id"));
+                        subject_For_PracticeDTO.setCredits(requestJsonObject.getInt("credits"));
+                        subject_For_PracticeDTO.setName(requestJsonObject.getString("name"));
+                        subject_For_PracticeDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("study_program_id"));
+                        subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "work":
+                        WorkDTO workDTO = workService.getWorkById(requestJsonObject.getInt("id"));
+                        workDTO.setAccount_id_account(requestJsonObject.getInt("work_account_id"));
+                        workDTO.setCompletion_year(requestJsonObject.getString("completion_year"));
+                        workDTO.setContract(requestJsonObject.getString("contract"));
+                        workDTO.setFeedback_company(requestJsonObject.getString("feedback_company"));
+                        workDTO.setFeedback_student(requestJsonObject.getString("feedback_student"));
+                        workDTO.setMark(requestJsonObject.getString("mark"));
+                        workDTO.setOffer_id_offer(requestJsonObject.getInt("offer_id"));
+                        workDTO.setState(requestJsonObject.getString("state"));
+                        workDTO.setWork_log(requestJsonObject.getString("work_log"));
+                        workService.saveWork(workDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Work.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    case "communication":
+                        CommunicationDTO communicationDTO = communicationService.getCommunicationId(requestJsonObject.getInt("id"));
+                        communicationDTO.setAccount_id_account(requestJsonObject.getInt("account_1"));
+                        communicationDTO.setAccount_id_account1(requestJsonObject.getInt("account_2"));
+                        communicationDTO.setMessages(requestJsonObject.getString("messages"));
+                        communicationService.saveCommunication(communicationDTO);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Communication.class.getName() + " instance updated");
+                        return responseObject.toString();
+                    default:
+                        responseObject.put("response_code", RESPONSECODE_ERROR);
+                        responseObject.put("responseMessage", "Invalid class type");
+                        return responseObject.toString();
+                }
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na aktualizovanie tried touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+    
+    /**
+     * @apiNote Direct delete method for each class in DB
+     * @param entity request JSON
+     * @param classType type of update we want to delete using CRUD
+     * @return error/success/permision_denied JSON
+     */
+    @GetMapping(value="/adminCRUD/delete/{classType}")
+    public String deleteClass(@RequestBody String entity, @PathVariable String classType) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("admin")){
+                switch (classType) {
+                    case "account":
+                        accountService.deleteAccount(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Account.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "company":
+                        companyService.deleteCompany(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Company.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "offer":
+                        offerService.deleteOffer(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Offer.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "person":
+                        personService.deletePerson(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Person.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "report":
+                        reportService.deleteReport(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Report.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "study_program":
+                        study_ProgramService.deleteStudyProgram(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Study_Program.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "subject_for_practice":
+                        subject_For_PracticeService.deleteSubjectForPractice(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "work":
+                        workService.deleteWork(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Work.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    case "communication":
+                        communicationService.deleteCommunication(requestJsonObject.getInt("id"));
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", Communication.class.getName() + " instance deleted");
+                        return responseObject.toString();
+                    default:
+                        responseObject.put("response_code", RESPONSECODE_ERROR);
+                        responseObject.put("responseMessage", "Invalid class type");
+                        return responseObject.toString();
+                }
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na vymazávanie tried touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
