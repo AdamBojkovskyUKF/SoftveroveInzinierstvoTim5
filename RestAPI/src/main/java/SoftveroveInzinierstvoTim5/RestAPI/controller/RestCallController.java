@@ -640,7 +640,7 @@ public class RestCallController {
     /**
      * @apiNote Direct update method for each class in DB
      * @param entity request JSON
-     * @param classType type of update we want to read using CRUD
+     * @param classType type of update we want to update using CRUD
      * @return error/success/permision_denied JSON
      */
     @PostMapping(value="/adminCRUD/update/{classType}")
