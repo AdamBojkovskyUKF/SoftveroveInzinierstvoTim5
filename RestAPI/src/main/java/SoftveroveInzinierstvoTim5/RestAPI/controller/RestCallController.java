@@ -1,6 +1,7 @@
 package SoftveroveInzinierstvoTim5.RestAPI.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,11 +13,7 @@ import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 import org.json.*;
 
 @RestController
@@ -834,6 +831,87 @@ public class RestCallController {
             }else{
                 responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na vymazávanie tried touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+
+    @GetMapping(value = "/adminReport/{classType}")
+    public String reportGenerator(@RequestBody String entity, @PathVariable String classType){
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("admin")){
+                switch (classType) {
+                    case "account":
+                        List <AccountDTO> accountDTOs = accountService.getAllAccounts();
+                        JSONArray accountJsonArray = new JSONArray(accountDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", accountJsonArray);
+                        return responseObject.toString();
+                    case "company":
+                        List <CompanyDTO> companyDTOs = companyService.getAllCompanies();
+                        JSONArray companyJsonArray = new JSONArray(companyDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", companyJsonArray);
+                        return responseObject.toString();
+                    case "offer":
+                        List <OfferDTO> offerDTOs = offerService.getAllOffers();
+                        JSONArray offerJsonArray = new JSONArray(offerDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", offerJsonArray);
+                        return responseObject.toString();
+                    case "person":
+                        List <PersonDTO> personDTOs = personService.getAllPersons();
+                        JSONArray personJsonArray = new JSONArray(personDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", personJsonArray);
+                        return responseObject.toString();
+                    case "report":
+                        List <ReportDTO> reportDTOs = reportService.getAllReports();
+                        JSONArray reportJsonArray = new JSONArray(reportDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", reportJsonArray);
+                        return responseObject.toString();
+                    case "study_program":
+                        List <Study_ProgramDTO> study_ProgramDTOs = study_ProgramService.getAllStudyPrograms();
+                        JSONArray studyProgramJsonArray = new JSONArray(study_ProgramDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", studyProgramJsonArray);
+                        return responseObject.toString();
+                    case "subject_for_practice":
+                        List <Subject_For_PracticeDTO> subject_For_PracticeDTOs = subject_For_PracticeService.getAllSubjectsForPractice();
+                        JSONArray subjectForPracticeJsonArray= new JSONArray(subject_For_PracticeDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", subjectForPracticeJsonArray);
+                        return responseObject.toString();
+                    case "work":
+                        List <WorkDTO> workDTOs = workService.getAllWorks();
+                        JSONArray workJsonArray = new JSONArray(workDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", workJsonArray);
+                        return responseObject.toString();
+                    case "communication":
+                        List <CommunicationDTO> communicationDTOs = communicationService.getAllCommunications();
+                        JSONArray communicationJsonArray = new JSONArray(communicationDTOs);
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("objectArray", communicationJsonArray);
+                        return responseObject.toString();
+                    default:
+                        responseObject.put("response_code", RESPONSECODE_ERROR);
+                        responseObject.put("responseMessage", "Invalid class type");
+                        return responseObject.toString();
+                }
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na generovanie reportov touto metódou");
 
                 return responseObject.toString();
             }
