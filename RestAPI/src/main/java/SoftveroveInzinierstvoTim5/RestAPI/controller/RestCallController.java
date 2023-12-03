@@ -140,32 +140,38 @@ public class RestCallController {
      */
     @GetMapping("/zobrazFirmy")
     public String zobrazFirmy(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int id = json.getInt("account_id");
-        AccountDTO acc = accountService.getAccountId(id);
         JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
 
-        List <CompanyDTO> companies = companyService.getAllCompanies();
-        JSONArray companiesArray = new JSONArray();
+            List <CompanyDTO> companies = companyService.getAllCompanies();
+            JSONArray companiesArray = new JSONArray();
 
-        if(acc.getRole().equals("admin") || acc.getRole().equals("veduci_pracoviska") || acc.getRole().equals("povereny_pracovnik")) {
-            for (CompanyDTO companyDTO : companies) {
-                JSONObject companyJson = new JSONObject();
-                PersonDTO representative = personService.getPersonById(companyDTO.getRepresentative_id_person());
+            if(acc.getRole().equals("admin") || acc.getRole().equals("veduci_pracoviska") || acc.getRole().equals("povereny_pracovnik")) {
+                for (CompanyDTO companyDTO : companies) {
+                    JSONObject companyJson = new JSONObject();
+                    PersonDTO representative = personService.getPersonById(companyDTO.getRepresentative_id_person());
 
-                companyJson.put("Názov: ", companyDTO.getName());
-                companyJson.put(" Adresa: ", companyDTO.getAddress());
-                companyJson.put(" Meno: ", representative.getName());
-                companyJson.put(" Priezvisko: ", representative.getSurname());
+                    companyJson.put("Názov: ", companyDTO.getName());
+                    companyJson.put(" Adresa: ", companyDTO.getAddress());
+                    companyJson.put(" Meno: ", representative.getName());
+                    companyJson.put(" Priezvisko: ", representative.getSurname());
 
-                companiesArray.put(companyJson);
+                    companiesArray.put(companyJson);
+                }
+
+                return companiesArray.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu firiem.");
+
+                return responseObject.toString();
             }
-
-            return companiesArray.toString();
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu firiem.");
-
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
@@ -177,36 +183,42 @@ public class RestCallController {
      */
     @GetMapping("/zobrazStudentovNaPraxi")
     public String zobrazStudentovNaPraxi(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int id = json.getInt("account_id");
-        AccountDTO acc = accountService.getAccountId(id);
-        
-        List<WorkDTO> works = workService.getAllWorks();
-        JSONArray studentWorkArray = new JSONArray();
-
         JSONObject responseObject = new JSONObject();
-        
-        if(acc.getRole().equals("veduci_pracoviska")) {
-            for (WorkDTO workDTO : works) {
-                JSONObject studentWork = new JSONObject();
-                AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
-                PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
-                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
 
-                studentWork.put("Meno: ", studentPerson.getName());
-                studentWork.put(" Priezvisko: ", studentPerson.getSurname());
-                studentWork.put(" Firma: ", company.getName());
-                studentWork.put(" Stav: ", workDTO.getState());
-                                
-                studentWorkArray.put(studentWork);
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+            
+            List<WorkDTO> works = workService.getAllWorks();
+            JSONArray studentWorkArray = new JSONArray();
+            
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                for (WorkDTO workDTO : works) {
+                    JSONObject studentWork = new JSONObject();
+                    AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
+                    PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
+                    OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                    CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+
+                    studentWork.put("Meno: ", studentPerson.getName());
+                    studentWork.put(" Priezvisko: ", studentPerson.getSurname());
+                    studentWork.put(" Firma: ", company.getName());
+                    studentWork.put(" Stav: ", workDTO.getState());
+                                    
+                    studentWorkArray.put(studentWork);
+                }
+
+                return studentWorkArray.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi.");
+
+                return responseObject.toString();
             }
-
-            return studentWorkArray.toString();
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi.");
-
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
@@ -218,38 +230,44 @@ public class RestCallController {
      */
     @GetMapping("/zobrazSchvaleneUkoncenePraxe")
     public String zobrazSchvaleneUkoncenePraxe(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int id = json.getInt("account_id");
-        AccountDTO acc = accountService.getAccountId(id);
-
-        List<WorkDTO> works = workService.getAllWorks();
-        JSONArray studentWorkArray = new JSONArray();
-
         JSONObject responseObject = new JSONObject();
 
-        if(acc.getRole().equals("veduci_pracoviska")) {
-            for (WorkDTO workDTO : works) {
-                JSONObject studentWork = new JSONObject();
-                AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
-                PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
-                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
 
-                if(workDTO.getState().equals("schvalena") || workDTO.getState().equals("ukoncena")) {
-                    studentWork.put("Meno: ", studentPerson.getName());
-                    studentWork.put(" Priezvisko: ", studentPerson.getSurname());
-                    studentWork.put(" Firma: ", company.getName());
-                    studentWork.put(" Stav: ", workDTO.getState());
+            List<WorkDTO> works = workService.getAllWorks();
+            JSONArray studentWorkArray = new JSONArray();
 
-                    studentWorkArray.put(studentWork);
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                for (WorkDTO workDTO : works) {
+                    JSONObject studentWork = new JSONObject();
+                    AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
+                    PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
+                    OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                    CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+
+                    if(workDTO.getState().equals("schvalena") || workDTO.getState().equals("ukoncena")) {
+                        studentWork.put("Meno: ", studentPerson.getName());
+                        studentWork.put(" Priezvisko: ", studentPerson.getSurname());
+                        studentWork.put(" Firma: ", company.getName());
+                        studentWork.put(" Stav: ", workDTO.getState());
+
+                        studentWorkArray.put(studentWork);
+                    }
                 }
+
+                return studentWorkArray.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu schválených a ukončených praxí študentov.");
+
+                return responseObject.toString();
             }
-
-            return studentWorkArray.toString();
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu schválených a ukončených praxí študentov.");
-
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
@@ -261,40 +279,46 @@ public class RestCallController {
      */
     @GetMapping("/zobrazStudentovNaPraxiPodlaKatedry")
     public String zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int id = json.getInt("account_id");
-        String institut = json.getString("institute");
-        AccountDTO acc = accountService.getAccountId(id);
-        
-        List<WorkDTO> works = workService.getAllWorks();
-        JSONArray studentWorkArray = new JSONArray();
-
         JSONObject responseObject = new JSONObject();
-        
-        if(acc.getRole().equals("veduci_pracoviska")) {
-            for (WorkDTO workDTO : works) {
-                JSONObject studentWork = new JSONObject();
-                AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
-                PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
-                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
 
-                if(studentAcc.getInstitute().equals(institut)) {
-                    studentWork.put("Meno: ", studentPerson.getName());
-                    studentWork.put(" Priezvisko: ", studentPerson.getSurname());
-                    studentWork.put(" Firma: ", company.getName());
-                    studentWork.put(" Stav: ", workDTO.getState());
-                    studentWork.put(" Katedra: ", studentAcc.getInstitute());
-                    
-                    studentWorkArray.put(studentWork);
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            String institut = json.getString("institute");
+            AccountDTO acc = accountService.getAccountId(id);
+            
+            List<WorkDTO> works = workService.getAllWorks();
+            JSONArray studentWorkArray = new JSONArray();
+            
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                for (WorkDTO workDTO : works) {
+                    JSONObject studentWork = new JSONObject();
+                    AccountDTO studentAcc = accountService.getAccountId(workDTO.getAccount_id_account());
+                    PersonDTO studentPerson = personService.getPersonById(studentAcc.getPerson_id_person());
+                    OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                    CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+
+                    if(studentAcc.getInstitute().equals(institut)) {
+                        studentWork.put("Meno: ", studentPerson.getName());
+                        studentWork.put(" Priezvisko: ", studentPerson.getSurname());
+                        studentWork.put(" Firma: ", company.getName());
+                        studentWork.put(" Stav: ", workDTO.getState());
+                        studentWork.put(" Katedra: ", studentAcc.getInstitute());
+                        
+                        studentWorkArray.put(studentWork);
+                    }
                 }
+
+                return studentWorkArray.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.");
+
+                return responseObject.toString();
             }
-
-            return studentWorkArray.toString();
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.");
-
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
@@ -306,34 +330,40 @@ public class RestCallController {
      */
     @PostMapping("/vytvorReportZaPracovisko")
     public String vytvorReportZaPracovisko(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int accountId = json.getInt("account_id");
-        AccountDTO acc = accountService.getAccountId(accountId);
-
         JSONObject responseObject = new JSONObject();
 
-        if (acc.getRole().equals("veduci_pracoviska")) {
-            JSONObject contentJson = json.getJSONObject("content");
-            String timestamp = json.getString("timestamp");
-            String type = json.getString("type");
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int accountId = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(accountId);
 
-            ReportDTO newReport = new ReportDTO();
+            if (acc.getRole().equals("veduci_pracoviska")) {
+                JSONObject contentJson = json.getJSONObject("content");
+                String timestamp = json.getString("timestamp");
+                String type = json.getString("type");
 
-            newReport.setCreatoraccount_id_account(accountId);
-            newReport.setContent(contentJson.toString());
-            newReport.setTimestamp(timestamp);
-            newReport.setType(type);
+                ReportDTO newReport = new ReportDTO();
 
-            reportService.saveReport(newReport);
+                newReport.setCreatoraccount_id_account(accountId);
+                newReport.setContent(contentJson.toString());
+                newReport.setTimestamp(timestamp);
+                newReport.setType(type);
 
-            responseObject.put("response_code", RESPONSECODE_OK);
-            responseObject.put("responseMessage", "Report úspešne vytvorený.");
+                reportService.saveReport(newReport);
 
-            return responseObject.toString();
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš povolenie pre vytváranie reportu za pracovisko.");
+                responseObject.put("response_code", RESPONSECODE_OK);
+                responseObject.put("responseMessage", "Report úspešne vytvorený.");
 
+                return responseObject.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie pre vytváranie reportu za pracovisko.");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
@@ -345,75 +375,93 @@ public class RestCallController {
      */
     @GetMapping("/zobrazSpatneVazbyZastupcuFirmy")
     public String zobrazSpatneVazbyZastupcuFirmy(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int id = json.getInt("account_id");
-        String menoFirmy = json.getString("meno_firmy");
-        AccountDTO acc = accountService.getAccountId(id);
-        List<WorkDTO> works = workService.getAllWorks();
-
         JSONObject responseObject = new JSONObject();
-        JSONArray feedbackCompanyArray = new JSONArray();
 
-        if(acc.getRole().equals("veduci_pracoviska")) {
-            for (WorkDTO workDTO : works) {
-                JSONObject feedbackCompany = new JSONObject();
-                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
-                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
-                PersonDTO person = personService.getPersonById(company.getRepresentative_id_person());
-                AccountDTO account = accountService.getAccountId(workDTO.getAccount_id_account());
-                PersonDTO studentPerson = personService.getPersonById(account.getPerson_id_person());
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            String menoFirmy = json.getString("meno_firmy");
+            AccountDTO acc = accountService.getAccountId(id);
+            List<WorkDTO> works = workService.getAllWorks();
 
-                if(company.getName().equals(menoFirmy)) {
-                    feedbackCompany.put(" Zástupca Meno: ", person.getName());
-                    feedbackCompany.put(" Zástupca Priezvisko: ", person.getSurname());
-                    feedbackCompany.put(" Študent Meno: ", studentPerson.getName());
-                    feedbackCompany.put(" Študent priezvisko: ", studentPerson.getSurname());
-                    feedbackCompany.put(" Spätná väzba: ", workDTO.getFeedback_company());
+            JSONArray feedbackCompanyArray = new JSONArray();
 
-                    feedbackCompanyArray.put(feedbackCompany);
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                for (WorkDTO workDTO : works) {
+                    JSONObject feedbackCompany = new JSONObject();
+                    OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                    CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+                    PersonDTO person = personService.getPersonById(company.getRepresentative_id_person());
+                    AccountDTO account = accountService.getAccountId(workDTO.getAccount_id_account());
+                    PersonDTO studentPerson = personService.getPersonById(account.getPerson_id_person());
+
+                    if(company.getName().equals(menoFirmy)) {
+                        feedbackCompany.put(" Zástupca Meno: ", person.getName());
+                        feedbackCompany.put(" Zástupca Priezvisko: ", person.getSurname());
+                        feedbackCompany.put(" Študent Meno: ", studentPerson.getName());
+                        feedbackCompany.put(" Študent priezvisko: ", studentPerson.getSurname());
+                        feedbackCompany.put(" Spätná väzba: ", workDTO.getFeedback_company());
+
+                        feedbackCompanyArray.put(feedbackCompany);
+                    }
                 }
+
+                return feedbackCompanyArray.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie spätných väzieb zástupcu firmy.");
+
+                return responseObject.toString();
             }
-
-            return feedbackCompanyArray.toString();
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie spätných väzieb zástupcu firmy.");
-
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
 
+    /**
+     * @apiNote priradovanie povereneho pracovnika pracoviska ku ponuke praxi
+     * @param requestString
+     * @return
+     */
     @PostMapping("/priradPoverenehoPracovnika")
     public String priradPoverenehoPracovnika(@RequestBody String requestString) {
-        JSONObject json = new JSONObject(requestString);
-        int id = json.getInt("account_id");
-        int id_offer = json.getInt("offer_id");
-        int overseer_id_person = json.getInt("person_id");
-
-        AccountDTO acc = accountService.getAccountId(id);
-
         JSONObject responseObject = new JSONObject();
 
-        if(acc.getRole().equals("veduci_pracoviska")) {
-            OfferDTO offer = offerService.getOfferId(id_offer);
-            if(offer.getOverseer_id_person() != null) {
-                responseObject.put("response_code", RESPONSECODE_ERROR);
-                responseObject.put("responseMessage", "Zadaná ponuka už má prideleného povereného pracovníka katedry.");
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            int id_offer = json.getInt("offer_id");
+            int overseer_id_person = json.getInt("person_id");
 
-                return responseObject.toString();
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                OfferDTO offer = offerService.getOfferId(id_offer);
+                if(offer.getOverseer_id_person() != null) {
+                    responseObject.put("response_code", RESPONSECODE_ERROR);
+                    responseObject.put("responseMessage", "Zadaná ponuka už má prideleného povereného pracovníka katedry.");
+
+                    return responseObject.toString();
+                } else {
+                    offer.setOverseer_id_person(overseer_id_person);
+                    offerService.saveOffer(offer);
+
+                    responseObject.put("response_code", RESPONSECODE_OK);
+                    responseObject.put("responseMessage", "Úspešne si priradil povereného pracovníka katedry danej pracovnej ponuke.");
+
+                    return responseObject.toString();
+                }
             } else {
-                offer.setOverseer_id_person(overseer_id_person);
-                offerService.saveOffer(offer);
-
-                responseObject.put("response_code", RESPONSECODE_OK);
-                responseObject.put("responseMessage", "Úspešne si priradil povereného pracovníka katedry danej pracovnej ponuke.");
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie priraďovať poverených pracovníkov katedier k ponukám práce.");
 
                 return responseObject.toString();
             }
-        } else {
-            responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
-            responseObject.put("responseMessage", "Nemáš povolenie priraďovať poverených pracovníkov katedier k ponukám práce.");
-
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
             return responseObject.toString();
         }
     }
