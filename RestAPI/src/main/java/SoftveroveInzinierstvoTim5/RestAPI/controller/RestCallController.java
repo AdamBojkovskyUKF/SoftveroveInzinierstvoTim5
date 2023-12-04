@@ -14,6 +14,8 @@ import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
 
 import java.util.List;
+
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.json.*;
 
 @RestController
@@ -961,6 +963,98 @@ public class RestCallController {
                 responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na generovanie reportov touto metódou");
 
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+    
+    @GetMapping(value = "/student/zobrazponuky")
+    public String viewOffers(@RequestBody String entity, @PathVariable String classType){
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("student")){
+                List <OfferDTO> offerDTOs = offerService.getAllOffers();
+                    JSONArray offerJsonArray = new JSONArray(offerDTOs);
+                    responseObject.put("response_code", RESPONSECODE_OK);
+                    responseObject.put("objectArray", offerJsonArray);
+                    return responseObject.toString();
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie ponúk touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+    
+    @GetMapping(value = "/student/vytvoritRobotuzPonuky")
+    public String createWorkFromOffer(@RequestBody String entity, @PathVariable String classType){
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("student")){
+                WorkDTO workDTO = new WorkDTO();
+                workDTO.setAccount_id_account(acc_id);
+                workDTO.setOffer_id_offer(requestJsonObject.getInt("offer_id"));
+                workDTO.setContract(requestJsonObject.getString("contract"));
+                workDTO.setState(requestJsonObject.getString("state"));
+                workDTO.setWork_log(requestJsonObject.getString("work_log"));
+                if (!requestJsonObject.getString("completion_year").isEmpty() && requestJsonObject.getString("completion_year") != null) {
+                    workDTO.setCompletion_year(requestJsonObject.getString("completion_year"));
+                }
+                workService.saveWork(workDTO);
+                responseObject.put("response_code", RESPONSECODE_OK);
+                responseObject.put("responseMessage", Work.class.getName() + " instance created");
+                return responseObject.toString();
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie ponúk touto metódou");
+
+                return responseObject.toString();
+            }
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+    @GetMapping(value = "/student/vybratProgram")
+    public String chooseStudyProgram(@RequestBody String entity, @PathVariable String classType){
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject requestJsonObject = new JSONObject(entity);
+            int acc_id = requestJsonObject.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(acc_id);
+            if(acc.getRole().equals("student")){
+                AccountDTO accountDTO = accountService.getAccountId(acc_id);
+                if(accountDTO.getStudy_program_idstudy_program() == null || accountDTO.getStudy_program_idstudy_program() == 0){
+                    accountDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("study_program_id"));
+                    accountService.saveAccount(accountDTO);
+                    responseObject.put("response_code", RESPONSECODE_OK);
+                    responseObject.put("responseMessage", Account.class.getName() + " instance updated");
+                    return responseObject.toString();
+                }else{
+                    responseObject.put("response_code", RESPONSECODE_ERROR);
+                    responseObject.put("responseMessage", "Účet už má priradený študijný program");
+                    return responseObject.toString();
+                }
+                
+            }else{
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na pridavanie študijných programov touto metódou");
                 return responseObject.toString();
             }
         } catch (Exception e) {
