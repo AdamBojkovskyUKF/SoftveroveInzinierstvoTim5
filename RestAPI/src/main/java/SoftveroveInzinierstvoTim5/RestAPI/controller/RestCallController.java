@@ -480,7 +480,6 @@ public class RestCallController {
         try {
             JSONObject json = new JSONObject(requestString);
             int id = json.getInt("account_id");
-            String menoFirmy = json.getString("meno_firmy");
             AccountDTO acc = accountService.getAccountId(id);
             List<WorkDTO> works = workService.getAllWorks();
 
@@ -493,8 +492,9 @@ public class RestCallController {
                     CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
                     AccountDTO student = accountService.getAccountId(workDTO.getAccount_id_account());
                     PersonDTO studentPerson = personService.getPersonById(student.getPerson_id_person());
+                    PersonDTO reprePerson = personService.getPersonById(acc.getPerson_id_person());
 
-                    if(company.getName().equals(menoFirmy)) {
+                    if(reprePerson.getId_person() == company.getRepresentative_id_person()) {
                         work.put(" Kontrakt: ", workDTO.getContract());
                         work.put(" Stav: ", workDTO.getState());
                         work.put(" Popis práce: ", workDTO.getWork_log());
@@ -506,7 +506,7 @@ public class RestCallController {
                         work.put(" Priezvisko študenta: ", studentPerson.getSurname());
 
                         worksArray.put(work);
-                    }
+                    } 
                 }
 
                 return worksArray.toString();
@@ -525,7 +525,7 @@ public class RestCallController {
     }
 
     /**
-     * @apiNote vytvrania spatnej vazby k pracam
+     * @apiNote vytvrania spatnej vazby od firiem k pracam
      * @param requestString
      * @return
      */
