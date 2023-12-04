@@ -48,6 +48,7 @@ public class DefaultWorkService implements WorkService{
 
     private WorkDTO populateWorkData(final Work work) {
         WorkDTO workData = new WorkDTO();
+        workData.setId_work(work.getId_work());
         workData.setOffer_id_offer(work.getOffer_id_offer());
         workData.setAccount_id_account(work.getAccount_id_account());
         workData.setContract(work.getContract());
@@ -62,6 +63,7 @@ public class DefaultWorkService implements WorkService{
 
     private Work populateWorkEntity(WorkDTO workData) {
         Work work = new Work();
+        work.setId_work(workData.getId_work());
         work.setOffer_id_offer(workData.getOffer_id_offer());
         work.setAccount_id_account(workData.getAccount_id_account());
         work.setContract(workData.getContract());

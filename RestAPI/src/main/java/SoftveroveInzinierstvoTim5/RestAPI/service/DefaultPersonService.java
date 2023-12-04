@@ -48,6 +48,7 @@ public class DefaultPersonService implements PersonService {
 
     private PersonDTO populatePersonData(final Person person) {
         PersonDTO personData = new PersonDTO();
+        personData.setId_person(person.getId_person());
         personData.setAddress(person.getAddress());
         personData.setName(person.getName());
         personData.setSurname(person.getSurname());
@@ -59,6 +60,7 @@ public class DefaultPersonService implements PersonService {
 
     private Person populatePersonEntity(PersonDTO personData) {
         Person person = new Person();
+        person.setId_person(personData.getId_person());
         person.setAddress(personData.getAddress());
         person.setName(personData.getName());
         person.setSurname(personData.getSurname());

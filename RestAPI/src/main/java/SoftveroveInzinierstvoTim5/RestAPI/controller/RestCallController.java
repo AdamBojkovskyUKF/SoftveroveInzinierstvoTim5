@@ -468,6 +468,11 @@ public class RestCallController {
         }
     }
 
+    /**
+     * @apiNote zobrazovanie praxe v danej organizacii
+     * @param requestString
+     * @return
+     */
     @GetMapping("/zobrazitPraxeVoSvojejOrganizacii")
     public String zobrazitPraxeVoSvojejOrganizacii(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -512,6 +517,62 @@ public class RestCallController {
             }
 
 
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+
+    /**
+     * @apiNote vytvrania spatnej vazby k pracam
+     * @param requestString
+     * @return
+     */
+    @PostMapping("/vytvorSpatnuVazbuPraxe")
+    public String vytvorSpatnuVazbuPraxe(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            int id_work = json.getInt("work_id");
+            String spatnaVazba = json.getString("spatna_vazba");
+
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("zastupca_firmy")) {
+                WorkDTO work = workService.getWorkById(id_work);
+                OfferDTO offer = offerService.getOfferId(work.getOffer_id_offer());
+                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+                PersonDTO reprePerson = personService.getPersonById(acc.getPerson_id_person());
+                
+                if(company.getRepresentative_id_person() == reprePerson.getId_person()) {
+                    if(work.getFeedback_company() != null) {
+                        responseObject.put("response_code", RESPONSECODE_ERROR);
+                        responseObject.put("responseMessage", "Zadaná práca už má vytvorenú spätnú väzbu od firmy.");
+                        return responseObject.toString();
+                    } else {
+                        work.setFeedback_company(spatnaVazba);
+                        workService.saveWork(work);
+
+                        responseObject.put("response_code", RESPONSECODE_OK);
+                        responseObject.put("responseMessage", "Úspešne si vytvoril spätnú väzbu firmy pre zadanú prax.");
+
+                        return responseObject.toString();
+                    }
+                } else {
+                    responseObject.put("response_code", RESPONSECODE_ERROR);
+                    responseObject.put("responseMessage", "Nemáš prístup k tejto praxi, pretože nie si zástupca firmy, v ktorej sa vykonáva.");
+
+                    return responseObject.toString();
+                }
+
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie spätných väzieb firiem.");
+                return responseObject.toString();
+            }
         } catch (Exception e) {
             responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
