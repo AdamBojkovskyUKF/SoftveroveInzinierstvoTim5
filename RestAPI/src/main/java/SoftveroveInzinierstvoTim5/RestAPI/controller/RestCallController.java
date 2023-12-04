@@ -468,6 +468,57 @@ public class RestCallController {
         }
     }
 
+    @GetMapping("/zobrazitPraxeVoSvojejOrganizacii")
+    public String zobrazitPraxeVoSvojejOrganizacii(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            String menoFirmy = json.getString("meno_firmy");
+            AccountDTO acc = accountService.getAccountId(id);
+            List<WorkDTO> works = workService.getAllWorks();
+
+            JSONArray worksArray = new JSONArray();
+
+            if(acc.getRole().equals("zastupca_firmy")) {
+                for (WorkDTO workDTO : works) {
+                    JSONObject work = new JSONObject();
+                    OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                    CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+                    AccountDTO student = accountService.getAccountId(workDTO.getAccount_id_account());
+                    PersonDTO studentPerson = personService.getPersonById(student.getPerson_id_person());
+
+                    if(company.getName().equals(menoFirmy)) {
+                        work.put(" Kontrakt: ", workDTO.getContract());
+                        work.put(" Stav: ", workDTO.getState());
+                        work.put(" Popis práce: ", workDTO.getWork_log());
+                        work.put(" Spätná väzba študent: ", workDTO.getFeedback_student());
+                        work.put(" Spätná väzba firma: ", workDTO.getFeedback_company());
+                        work.put(" Známka: ", workDTO.getMark());
+                        work.put(" Rok dokončenia: ", workDTO.getCompletion_year());
+                        work.put(" Meno študenta: ", studentPerson.getName());
+                        work.put(" Priezvisko študenta: ", studentPerson.getSurname());
+
+                        worksArray.put(work);
+                    }
+                }
+
+                return worksArray.toString();
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie praxí v danej organizácií.");
+                return responseObject.toString();
+            }
+
+
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+    }
+
     /**
      * @apiNote Direct create method for each class in DB
      * @param entity request JSON
