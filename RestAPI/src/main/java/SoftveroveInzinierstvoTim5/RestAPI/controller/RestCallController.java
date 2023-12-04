@@ -580,6 +580,52 @@ public class RestCallController {
         }
     }
 
+    @GetMapping("/odsuhlasitPracovnyVykaz")
+    public String odsuhlasitPracovnyVykaz(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            int work = json.getInt("work_id");
+            AccountDTO acc = accountService.getAccountId(id);
+            WorkDTO workDTO = workService.getWorkById(work);
+
+            if(acc.getRole().equals("zastupca_firmy")) {
+                OfferDTO offer = offerService.getOfferId(workDTO.getOffer_id_offer());
+                CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
+                PersonDTO reprePerson = personService.getPersonById(acc.getPerson_id_person());
+
+                if(reprePerson.getId_person() == company.getRepresentative_id_person()) {
+                    if(workDTO.getWork_log().length() > 100) {
+                        responseObject.put("responseMessage", "Pracovný výkaz odsúhlasený.");
+                        return responseObject.toString();
+                    } else {
+                        responseObject.put("responseMessage", "Pracovný výkaz zamietnutý.");
+                        return responseObject.toString();
+                    }
+                } else {
+                    responseObject.put("response_code", RESPONSECODE_ERROR);
+                    responseObject.put("responseMessage", "Nemáš prístup k tejto práci, pretože nie si zástupca danej firmy.");
+                    return responseObject.toString();
+                }
+
+
+            } else {
+                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
+                responseObject.put("responseMessage", "Nemáš povolenia odsúhlasovať pracovné výkazy.");
+                return responseObject.toString();
+            }
+            
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responseMessage", e.getMessage());
+            return responseObject.toString();
+        }
+
+
+    }
+
     /**
      * @apiNote Direct create method for each class in DB
      * @param entity request JSON
