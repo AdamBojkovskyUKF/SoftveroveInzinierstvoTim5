@@ -49,6 +49,7 @@ public class DefaultCompanyService implements CompanyService{
 
     private CompanyDTO populateCompanyData(final Company company) {
         CompanyDTO companyData = new CompanyDTO();
+        companyData.setId_company(company.getId_company());
         companyData.setRepresentative_id_person(company.getRepresentative_id_person());
         companyData.setName(company.getName());
         companyData.setAddress(company.getAddress());
@@ -57,6 +58,7 @@ public class DefaultCompanyService implements CompanyService{
 
     private Company populateCompanyEntity(CompanyDTO companyData) {
         Company company = new Company();
+        company.setId_company(companyData.getId_company());
         company.setRepresentative_id_person(companyData.getRepresentative_id_person());
         company.setName(companyData.getName());
         company.setAddress(companyData.getAddress());

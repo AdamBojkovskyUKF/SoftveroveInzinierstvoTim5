@@ -48,6 +48,7 @@ public class DefaultReportService implements ReportService{
 
     private ReportDTO populateReportData(final Report report) {
         ReportDTO reportData = new ReportDTO();
+        reportData.setIdreport(report.getIdreport());
         reportData.setCreatoraccount_id_account(report.getCreatoraccount_id_account());
         reportData.setContent(report.getContent());
         reportData.setTimestamp(report.getTimestamp());
@@ -57,6 +58,7 @@ public class DefaultReportService implements ReportService{
 
     private Report populateReportEntity(ReportDTO reportData) {
         Report report = new Report();
+        report.setIdreport(reportData.getIdreport());
         report.setCreatoraccount_id_account(reportData.getCreatoraccount_id_account());
         report.setContent(reportData.getContent());
         report.setTimestamp(reportData.getTimestamp());

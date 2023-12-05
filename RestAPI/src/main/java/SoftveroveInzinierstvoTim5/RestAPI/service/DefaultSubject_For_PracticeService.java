@@ -48,6 +48,7 @@ public class DefaultSubject_For_PracticeService implements Subject_For_PracticeS
 
     private Subject_For_PracticeDTO populateSubjectForPracticeData (final Subject_for_Practice subject_for_practice) {
         Subject_For_PracticeDTO subjectForPracticeData = new Subject_For_PracticeDTO();
+        subjectForPracticeData.setIdsubject_for_practice(subject_for_practice.getIdsubject_for_practice());
         subjectForPracticeData.setStudy_program_idstudy_program(subject_for_practice.getStudy_program_idstudy_program());
         subjectForPracticeData.setName(subject_for_practice.getName());
         subjectForPracticeData.setCredits(subject_for_practice.getCredits());
@@ -56,6 +57,7 @@ public class DefaultSubject_For_PracticeService implements Subject_For_PracticeS
 
     private Subject_for_Practice populateSubjectForPracticeEntity(Subject_For_PracticeDTO subjectForPracticeData) {
         Subject_for_Practice subject_for_practice = new Subject_for_Practice();
+        subject_for_practice.setIdsubject_for_practice(subjectForPracticeData.getIdsubject_for_practice());
         subject_for_practice.setStudy_program_idstudy_program(subjectForPracticeData.getStudy_program_idstudy_program());
         subject_for_practice.setName(subjectForPracticeData.getName());
         subject_for_practice.setCredits(subjectForPracticeData.getCredits());

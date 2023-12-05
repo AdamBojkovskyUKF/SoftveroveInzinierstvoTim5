@@ -48,6 +48,7 @@ public class DefaultCommunicationService implements CommunicationService{
 
     private CommunicationDTO populateCommunicationData(final Communication communication) {
         CommunicationDTO communicationData = new CommunicationDTO();
+        communicationData.setId_communication(communication.getId_communication());
         communicationData.setAccount_id_account(communication.getAccount_id_account());
         communicationData.setAccount_id_account1(communication.getAccount_id_account1());
         communicationData.setMessages(communication.getMessages());
@@ -56,6 +57,7 @@ public class DefaultCommunicationService implements CommunicationService{
 
     private Communication populateCommunicationEntity(CommunicationDTO communicationData) {
         Communication communication = new Communication();
+        communication.setId_communication(communicationData.getId_communication());
         communication.setAccount_id_account(communicationData.getAccount_id_account());
         communication.setAccount_id_account1(communicationData.getAccount_id_account1());
         communication.setMessages(communicationData.getMessages());
