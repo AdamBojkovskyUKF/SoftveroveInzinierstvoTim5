@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonStringFormatVisitor;
 import com.github.javafaker.Faker;
 
 import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
@@ -16,6 +18,7 @@ import SoftveroveInzinierstvoTim5.RestAPI.service.*;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils.Null;
+import org.hibernate.query.NativeQuery.ReturnProperty;
 import org.json.*;
 
 @RestController
@@ -623,7 +626,39 @@ public class RestCallController {
             return responseObject.toString();
         }
 
+    }
 
+    @PostMapping("/zmenaHesla")
+    public String zmenaHesla(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            String email = json.getString("email");
+            String password = json.getString("password");
+            String newPassword = json.getString("new_password");
+            List<AccountDTO> accounts = accountService.getAllAccounts();
+            for(AccountDTO accountDTO : accounts) {
+                if(accountDTO.getEmail_address().equals(email) && accountDTO.getPassword().equals(password)) {
+                    accountDTO.setPassword(newPassword);
+                    accountService.saveAccount(accountDTO);
+                    responseObject.put("response_code", RESPONSECODE_OK);
+                    responseObject.put("responseMessage", "Úspešne si si zmenil heslo.");
+                    return responseObject.toString();
+                } else {
+                    responseObject.put("response_code", RESPONSECODE_ERROR);
+                    responseObject.put("responseMessage", "Heslo sa nepodarilo zmeniť, pretože prihlasovacie údaje sú nesprávne.");
+                    return responseObject.toString();
+                }
+            }
+
+            return "";
+
+        } catch (Exception e) {
+            responseObject.put("response_code", RESPONSECODE_ERROR);
+            responseObject.put("responeMessage", e.getMessage());
+            return responseObject.toString();
+        }
     }
 
     /**
