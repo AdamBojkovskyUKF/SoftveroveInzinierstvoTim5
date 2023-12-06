@@ -56,7 +56,7 @@ public class RestCallController {
     public ResponseEntity<?> handleTestRequest() {
         List <PersonDTO> persons = personService.getAllPersons();
         JSONArray jsonArray = new JSONArray(persons);
-        return new ResponseEntity<>(jsonArray, HttpStatus.OK);
+        return new ResponseEntity<>(jsonArray.toString(), HttpStatus.OK);
     }
 
     @GetMapping("/dataSeed")
