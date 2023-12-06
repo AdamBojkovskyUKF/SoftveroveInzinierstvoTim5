@@ -2,10 +2,14 @@ package SoftveroveInzinierstvoTim5.RestAPI.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonStringFormatVisitor;
@@ -16,6 +20,8 @@ import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
 
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.lang3.ObjectUtils.Null;
 import org.hibernate.query.NativeQuery.ReturnProperty;
@@ -46,24 +52,15 @@ public class RestCallController {
 
     String[] institute = {"katedra_informatiky", "katedra_matematiky", "katedra_fyziky"};
 
-    final String RESPONSECODE_OK = "200";
-    final String RESPONSECODE_ERROR = "500";
-    final String RESPONSECODE_PERMISSION_DENIED = "1002";
-    final String RESPONSECODE_PERMISSION_GRANTED = "1001";
-
     @GetMapping("/test")
-    public String handleTestRequest() {
+    public ResponseEntity<?> handleTestRequest() {
         List <PersonDTO> persons = personService.getAllPersons();
-        String people = "";
-        for (PersonDTO personDTO : persons) {
-            people += "Person: " + personDTO.getName() + " "+ personDTO.getSurname() + 
-            " Email: " + personDTO.getEmail() + " Adress: "+ personDTO.getAddress() + "\n";
-        }
-        return people;
+        JSONArray jsonArray = new JSONArray(persons);
+        return new ResponseEntity<>(jsonArray, HttpStatus.OK);
     }
 
     @GetMapping("/dataSeed")
-    public String handleDataSeedRequest(){
+    public ResponseEntity<?> handleDataSeedRequest(){
         //if (!personService.getAllPersons().isEmpty()) {
             for (int i = 0; i < 20; i++) {
                 PersonDTO p = new PersonDTO();
@@ -107,7 +104,7 @@ public class RestCallController {
         adminAcc.setStudy_level("1234");
         accountService.saveAccount(adminAcc);
     
-        return "Data Loaded";
+        return new ResponseEntity<>("Data Loaded", HttpStatus.OK);
     }
     
     /**
@@ -116,7 +113,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping(value = "/login")
-    public String handleLoginRequest(@RequestBody String RequestBody){
+    public ResponseEntity<?> handleLoginRequest(@RequestBody String RequestBody){
         JSONObject json = new JSONObject(RequestBody);
         String password = json.getString("password");
         String email = json.getString("email");
@@ -125,17 +122,15 @@ public class RestCallController {
             for (AccountDTO accountDTO : accounts) {
                 if(accountDTO.getEmail_address().equals(email) && accountDTO.getPassword().equals(password))
                 {
-                    responseObject.put("response_code", RESPONSECODE_OK);
                     responseObject.put("reponseMessage", "Login Successful");
                     JSONObject reponseValues = new JSONObject();
                     reponseValues.put("account_id", accountDTO.getId_account());
                     responseObject.put("responseJSON", reponseValues);
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.OK);
                 }
             }
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("reponseMessage", "Login Failed -> Username + Password Combination not found");
-        return responseObject.toString();
+        return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
     }
 
     /**
@@ -144,7 +139,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping("/zobrazFirmy")
-    public String zobrazFirmy(@RequestBody String requestString) {
+    public ResponseEntity<?> zobrazFirmy(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject json = new JSONObject(requestString);
@@ -167,17 +162,14 @@ public class RestCallController {
                     companiesArray.put(companyJson);
                 }
 
-                return companiesArray.toString();
+                return new ResponseEntity<>(companiesArray,HttpStatus.OK);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu firiem.");
-
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject, HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -187,7 +179,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping("/zobrazStudentovNaPraxi")
-    public String zobrazStudentovNaPraxi(@RequestBody String requestString) {
+    public ResponseEntity<?> zobrazStudentovNaPraxi(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -214,17 +206,15 @@ public class RestCallController {
                     studentWorkArray.put(studentWork);
                 }
 
-                return studentWorkArray.toString();
+                return new ResponseEntity<>(studentWorkArray,HttpStatus.OK);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi.");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -234,7 +224,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping("/zobrazSchvaleneUkoncenePraxe")
-    public String zobrazSchvaleneUkoncenePraxe(@RequestBody String requestString) {
+    public ResponseEntity<?> zobrazSchvaleneUkoncenePraxe(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -263,17 +253,15 @@ public class RestCallController {
                     }
                 }
 
-                return studentWorkArray.toString();
+                return new ResponseEntity<>(studentWorkArray,HttpStatus.OK);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu schválených a ukončených praxí študentov.");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -283,7 +271,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping("/zobrazStudentovNaPraxiPodlaKatedry")
-    public String zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
+    public ResponseEntity<?> zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -314,17 +302,15 @@ public class RestCallController {
                     }
                 }
 
-                return studentWorkArray.toString();
+                return new ResponseEntity<>(studentWorkArray, HttpStatus.OK);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -334,7 +320,7 @@ public class RestCallController {
      * @return
      */
     @PostMapping("/vytvorReportZaPracovisko")
-    public String vytvorReportZaPracovisko(@RequestBody String requestString) {
+    public ResponseEntity<?> vytvorReportZaPracovisko(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -356,20 +342,15 @@ public class RestCallController {
 
                 reportService.saveReport(newReport);
 
-                responseObject.put("response_code", RESPONSECODE_OK);
                 responseObject.put("responseMessage", "Report úspešne vytvorený.");
-
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.OK);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie pre vytváranie reportu za pracovisko.");
-
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -379,7 +360,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping("/zobrazSpatneVazbyZastupcuFirmy")
-    public String zobrazSpatneVazbyZastupcuFirmy(@RequestBody String requestString) {
+    public ResponseEntity<?> zobrazSpatneVazbyZastupcuFirmy(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -411,17 +392,14 @@ public class RestCallController {
                     }
                 }
 
-                return feedbackCompanyArray.toString();
+                return new ResponseEntity<>(feedbackCompanyArray,HttpStatus.OK);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie spätných väzieb zástupcu firmy.");
-
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -431,7 +409,7 @@ public class RestCallController {
      * @return
      */
     @PostMapping("/priradPoverenehoPracovnika")
-    public String priradPoverenehoPracovnika(@RequestBody String requestString) {
+    public ResponseEntity<?> priradPoverenehoPracovnika(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -445,29 +423,25 @@ public class RestCallController {
             if(acc.getRole().equals("veduci_pracoviska")) {
                 OfferDTO offer = offerService.getOfferId(id_offer);
                 if(offer.getOverseer_id_person() != null) {
-                    responseObject.put("response_code", RESPONSECODE_ERROR);
                     responseObject.put("responseMessage", "Zadaná ponuka už má prideleného povereného pracovníka katedry.");
 
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
                 } else {
                     offer.setOverseer_id_person(overseer_id_person);
                     offerService.saveOffer(offer);
 
-                    responseObject.put("response_code", RESPONSECODE_OK);
                     responseObject.put("responseMessage", "Úspešne si priradil povereného pracovníka katedry danej pracovnej ponuke.");
 
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.OK);
                 }
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie priraďovať poverených pracovníkov katedier k ponukám práce.");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -477,7 +451,7 @@ public class RestCallController {
      * @return
      */
     @GetMapping("/zobrazitPraxeVoSvojejOrganizacii")
-    public String zobrazitPraxeVoSvojejOrganizacii(@RequestBody String requestString) {
+    public ResponseEntity<?> zobrazitPraxeVoSvojejOrganizacii(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         
         try {
@@ -512,18 +486,16 @@ public class RestCallController {
                     } 
                 }
 
-                return worksArray.toString();
+                return new ResponseEntity<>(worksArray,HttpStatus.INTERNAL_SERVER_ERROR);
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie praxí v danej organizácií.");
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
 
 
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -533,7 +505,7 @@ public class RestCallController {
      * @return
      */
     @PostMapping("/vytvorSpatnuVazbuPraxe")
-    public String vytvorSpatnuVazbuPraxe(@RequestBody String requestString) {
+    public ResponseEntity<?> vytvorSpatnuVazbuPraxe(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -552,39 +524,34 @@ public class RestCallController {
                 
                 if(company.getRepresentative_id_person() == reprePerson.getId_person()) {
                     if(work.getFeedback_company() != null) {
-                        responseObject.put("response_code", RESPONSECODE_ERROR);
                         responseObject.put("responseMessage", "Zadaná práca už má vytvorenú spätnú väzbu od firmy.");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
                     } else {
                         work.setFeedback_company(spatnaVazba);
                         workService.saveWork(work);
 
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", "Úspešne si vytvoril spätnú väzbu firmy pre zadanú prax.");
 
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     }
                 } else {
-                    responseObject.put("response_code", RESPONSECODE_ERROR);
                     responseObject.put("responseMessage", "Nemáš prístup k tejto praxi, pretože nie si zástupca firmy, v ktorej sa vykonáva.");
 
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
                 }
 
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na vytváranie spätných väzieb firiem.");
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/odsuhlasitPracovnyVykaz")
-    public String odsuhlasitPracovnyVykaz(@RequestBody String requestString) {
+    public ResponseEntity<?> odsuhlasitPracovnyVykaz(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         
         try {
@@ -602,34 +569,31 @@ public class RestCallController {
                 if(reprePerson.getId_person() == company.getRepresentative_id_person()) {
                     if(workDTO.getWork_log().length() > 100) {
                         responseObject.put("responseMessage", "Pracovný výkaz odsúhlasený.");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     } else {
                         responseObject.put("responseMessage", "Pracovný výkaz zamietnutý.");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     }
                 } else {
-                    responseObject.put("response_code", RESPONSECODE_ERROR);
                     responseObject.put("responseMessage", "Nemáš prístup k tejto práci, pretože nie si zástupca danej firmy.");
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
                 }
 
 
             } else {
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenia odsúhlasovať pracovné výkazy.");
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
             
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
 
     @PostMapping("/zmenaHesla")
-    public String zmenaHesla(@RequestBody String requestString) {
+    public ResponseEntity<?> zmenaHesla(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
         try {
@@ -642,22 +606,17 @@ public class RestCallController {
                 if(accountDTO.getEmail_address().equals(email) && accountDTO.getPassword().equals(password)) {
                     accountDTO.setPassword(newPassword);
                     accountService.saveAccount(accountDTO);
-                    responseObject.put("response_code", RESPONSECODE_OK);
                     responseObject.put("responseMessage", "Úspešne si si zmenil heslo.");
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.OK);
                 } else {
-                    responseObject.put("response_code", RESPONSECODE_ERROR);
                     responseObject.put("responseMessage", "Heslo sa nepodarilo zmeniť, pretože prihlasovacie údaje sú nesprávne.");
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
-
-            return "";
-
+            return new ResponseEntity<>(responseObject,HttpStatus.OK);
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responeMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -668,7 +627,7 @@ public class RestCallController {
      * @return error/success/permision_denied JSON
      */
     @PostMapping(value="/adminCRUD/create/{classType}")
-    public String createClass(@RequestBody String entity, @PathVariable String classType) {
+    public ResponseEntity<?> createClass(@RequestBody String entity, @PathVariable String classType) {
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -688,18 +647,16 @@ public class RestCallController {
                         accountDTO.setStudy_level(requestJsonObject.getString("study_level"));
                         accountDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("studyProgram_id"));
                         accountService.saveAccount(accountDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Account.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "company":
                         CompanyDTO companyDTO = new CompanyDTO();
                         companyDTO.setAddress(requestJsonObject.getString("address"));
                         companyDTO.setName(requestJsonObject.getString("name"));
                         companyDTO.setRepresentative_id_person(requestJsonObject.getInt("representative_id"));
                         companyService.saveCompany(companyDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Company.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "offer":
                         OfferDTO offerDTO = new OfferDTO();
                         offerDTO.setCompany_id_company(requestJsonObject.getInt("offer_id"));
@@ -708,9 +665,8 @@ public class RestCallController {
                         offerDTO.setOverseer_id_person(requestJsonObject.getInt("overseer_id"));
                         offerDTO.setPosition(requestJsonObject.getString("position"));
                         offerService.saveOffer(offerDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Offer.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "person":
                         PersonDTO personDTO = new PersonDTO();
                         personDTO.setAddress(requestJsonObject.getString("address"));
@@ -719,9 +675,8 @@ public class RestCallController {
                         personDTO.setPhone_number(requestJsonObject.getString("phone_number"));
                         personDTO.setSurname(requestJsonObject.getString("surname"));
                         personService.savePerson(personDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Person.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "report":
                         ReportDTO reportDTO = new ReportDTO();
                         reportDTO.setContent(requestJsonObject.getString("content"));
@@ -729,25 +684,22 @@ public class RestCallController {
                         reportDTO.setTimestamp(requestJsonObject.getString("timestamp"));
                         reportDTO.setType(requestJsonObject.getString("type"));
                         reportService.saveReport(reportDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Report.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "study_program":
                         Study_ProgramDTO study_ProgramDTO = new Study_ProgramDTO();
                         study_ProgramDTO.setName(requestJsonObject.getString("name"));
                         study_ProgramService.saveStudyProgram(study_ProgramDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Study_Program.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "subject_for_practice":
                         Subject_For_PracticeDTO subject_For_PracticeDTO = new Subject_For_PracticeDTO();
                         subject_For_PracticeDTO.setCredits(requestJsonObject.getInt("credits"));
                         subject_For_PracticeDTO.setName(requestJsonObject.getString("name"));
                         subject_For_PracticeDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("study_program_id"));
                         subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "work":
                         WorkDTO workDTO = new WorkDTO();
                         workDTO.setAccount_id_account(requestJsonObject.getInt("work_account_id"));
@@ -760,33 +712,28 @@ public class RestCallController {
                         workDTO.setState(requestJsonObject.getString("state"));
                         workDTO.setWork_log(requestJsonObject.getString("work_log"));
                         workService.saveWork(workDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Work.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "communication":
                         CommunicationDTO communicationDTO =  new CommunicationDTO();
                         communicationDTO.setAccount_id_account(requestJsonObject.getInt("account_1"));
                         communicationDTO.setAccount_id_account1(requestJsonObject.getInt("account_2"));
                         communicationDTO.setMessages(requestJsonObject.getString("messages"));
                         communicationService.saveCommunication(communicationDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Communication.class.getName() + " instance created");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     default:
-                        responseObject.put("response_code", RESPONSECODE_ERROR);
                         responseObject.put("responseMessage", "Invalid class type");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.BAD_REQUEST);
                 }
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na vytváranie tried touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -797,7 +744,7 @@ public class RestCallController {
      * @return error/permission_denied JSON ... if successful will return JSON of class instance
      */
     @GetMapping(value="/adminCRUD/read/{classType}")
-    public String readClass(@RequestBody String entity, @PathVariable String classType) {
+    public ResponseEntity<?> readClass(@RequestBody String entity, @PathVariable String classType) {
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -808,72 +755,60 @@ public class RestCallController {
                     case "account":
                         AccountDTO accountDTO = accountService.getAccountId(requestJsonObject.getInt("id"));
                         JSONObject responseAccount = new JSONObject(accountDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseAccount);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "company":
                         CompanyDTO companyDTO = companyService.getCompanyId(requestJsonObject.getInt("id"));
                         JSONObject responseCompany = new JSONObject(companyDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseCompany);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "offer":
                         OfferDTO offerDTO = offerService.getOfferId(requestJsonObject.getInt("id"));
                         JSONObject responseOffer = new JSONObject(offerDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseOffer);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "person":
                         PersonDTO personDTO = personService.getPersonById(requestJsonObject.getInt("id"));
                         JSONObject responsePerson = new JSONObject(personDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responsePerson);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "report":
                         ReportDTO reportDTO = reportService.getReportById(requestJsonObject.getInt("id"));
                         JSONObject responseReport = new JSONObject(reportDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseReport);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "study_program":
                         Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(requestJsonObject.getInt("id"));
                         JSONObject responseStudyProgram = new JSONObject(study_ProgramDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseStudyProgram);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "subject_for_practice":
                         Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(requestJsonObject.getInt("id"));
                         JSONObject responseSubjectForPractice = new JSONObject(subject_For_PracticeDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseSubjectForPractice);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "work":
                         WorkDTO workDTO = workService.getWorkById(requestJsonObject.getInt("id"));
                         JSONObject responseWork = new JSONObject(workDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseWork);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "communication":
                         CommunicationDTO communicationDTO = communicationService.getCommunicationId(requestJsonObject.getInt("id"));
                         JSONObject responseCommunication = new JSONObject(communicationDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("object", responseCommunication);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     default:
-                        responseObject.put("response_code", RESPONSECODE_ERROR);
                         responseObject.put("responseMessage", "Invalid class type");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.BAD_REQUEST);
                 }
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na čítanie tried touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -884,7 +819,7 @@ public class RestCallController {
      * @return error/success/permision_denied JSON
      */
     @PostMapping(value="/adminCRUD/update/{classType}")
-    public String updateClass(@RequestBody String entity, @PathVariable String classType) {
+    public ResponseEntity<?> updateClass(@RequestBody String entity, @PathVariable String classType) {
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -904,18 +839,16 @@ public class RestCallController {
                         accountDTO.setStudy_level(requestJsonObject.getString("study_level"));
                         accountDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("studyProgram_id"));
                         accountService.saveAccount(accountDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Account.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "company":
                         CompanyDTO companyDTO = companyService.getCompanyId(requestJsonObject.getInt("id"));
                         companyDTO.setAddress(requestJsonObject.getString("address"));
                         companyDTO.setName(requestJsonObject.getString("name"));
                         companyDTO.setRepresentative_id_person(requestJsonObject.getInt("representative_id"));
                         companyService.saveCompany(companyDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Company.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "offer":
                         OfferDTO offerDTO = offerService.getOfferId(requestJsonObject.getInt("id"));
                         offerDTO.setCompany_id_company(requestJsonObject.getInt("offer_id"));
@@ -924,9 +857,8 @@ public class RestCallController {
                         offerDTO.setOverseer_id_person(requestJsonObject.getInt("overseer_id"));
                         offerDTO.setPosition(requestJsonObject.getString("position"));
                         offerService.saveOffer(offerDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Offer.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "person":
                         PersonDTO personDTO = personService.getPersonById(requestJsonObject.getInt("id"));
                         personDTO.setAddress(requestJsonObject.getString("address"));
@@ -935,9 +867,8 @@ public class RestCallController {
                         personDTO.setPhone_number(requestJsonObject.getString("phone_number"));
                         personDTO.setSurname(requestJsonObject.getString("surname"));
                         personService.savePerson(personDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Person.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "report":
                         ReportDTO reportDTO = reportService.getReportById(requestJsonObject.getInt("id"));
                         reportDTO.setContent(requestJsonObject.getString("content"));
@@ -945,25 +876,22 @@ public class RestCallController {
                         reportDTO.setTimestamp(requestJsonObject.getString("timestamp"));
                         reportDTO.setType(requestJsonObject.getString("type"));
                         reportService.saveReport(reportDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Report.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "study_program":
                         Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(requestJsonObject.getInt("id"));
                         study_ProgramDTO.setName(requestJsonObject.getString("name"));
                         study_ProgramService.saveStudyProgram(study_ProgramDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Study_Program.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "subject_for_practice":
                         Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(requestJsonObject.getInt("id"));
                         subject_For_PracticeDTO.setCredits(requestJsonObject.getInt("credits"));
                         subject_For_PracticeDTO.setName(requestJsonObject.getString("name"));
                         subject_For_PracticeDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("study_program_id"));
                         subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "work":
                         WorkDTO workDTO = workService.getWorkById(requestJsonObject.getInt("id"));
                         workDTO.setAccount_id_account(requestJsonObject.getInt("work_account_id"));
@@ -976,33 +904,28 @@ public class RestCallController {
                         workDTO.setState(requestJsonObject.getString("state"));
                         workDTO.setWork_log(requestJsonObject.getString("work_log"));
                         workService.saveWork(workDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Work.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "communication":
                         CommunicationDTO communicationDTO = communicationService.getCommunicationId(requestJsonObject.getInt("id"));
                         communicationDTO.setAccount_id_account(requestJsonObject.getInt("account_1"));
                         communicationDTO.setAccount_id_account1(requestJsonObject.getInt("account_2"));
                         communicationDTO.setMessages(requestJsonObject.getString("messages"));
                         communicationService.saveCommunication(communicationDTO);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Communication.class.getName() + " instance updated");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     default:
-                        responseObject.put("response_code", RESPONSECODE_ERROR);
                         responseObject.put("responseMessage", "Invalid class type");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.BAD_REQUEST);
                 }
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na aktualizovanie tried touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -1013,7 +936,7 @@ public class RestCallController {
      * @return error/success/permision_denied JSON
      */
     @GetMapping(value="/adminCRUD/delete/{classType}")
-    public String deleteClass(@RequestBody String entity, @PathVariable String classType) {
+    public ResponseEntity<?> deleteClass(@RequestBody String entity, @PathVariable String classType) {
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -1023,69 +946,57 @@ public class RestCallController {
                 switch (classType) {
                     case "account":
                         accountService.deleteAccount(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Account.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "company":
                         companyService.deleteCompany(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Company.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "offer":
                         offerService.deleteOffer(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Offer.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "person":
                         personService.deletePerson(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Person.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "report":
                         reportService.deleteReport(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Report.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "study_program":
                         study_ProgramService.deleteStudyProgram(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Study_Program.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "subject_for_practice":
                         subject_For_PracticeService.deleteSubjectForPractice(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "work":
                         workService.deleteWork(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Work.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "communication":
                         communicationService.deleteCommunication(requestJsonObject.getInt("id"));
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("responseMessage", Communication.class.getName() + " instance deleted");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     default:
-                        responseObject.put("response_code", RESPONSECODE_ERROR);
                         responseObject.put("responseMessage", "Invalid class type");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.BAD_REQUEST);
                 }
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na vymazávanie tried touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping(value = "/adminReport/{classType}")
-    public String reportGenerator(@RequestBody String entity, @PathVariable String classType){
+    public ResponseEntity<?> reportGenerator(@RequestBody String entity, @PathVariable String classType){
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -1096,77 +1007,65 @@ public class RestCallController {
                     case "account":
                         List <AccountDTO> accountDTOs = accountService.getAllAccounts();
                         JSONArray accountJsonArray = new JSONArray(accountDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", accountJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "company":
                         List <CompanyDTO> companyDTOs = companyService.getAllCompanies();
                         JSONArray companyJsonArray = new JSONArray(companyDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", companyJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "offer":
                         List <OfferDTO> offerDTOs = offerService.getAllOffers();
                         JSONArray offerJsonArray = new JSONArray(offerDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", offerJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "person":
                         List <PersonDTO> personDTOs = personService.getAllPersons();
                         JSONArray personJsonArray = new JSONArray(personDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", personJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "report":
                         List <ReportDTO> reportDTOs = reportService.getAllReports();
                         JSONArray reportJsonArray = new JSONArray(reportDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", reportJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "study_program":
                         List <Study_ProgramDTO> study_ProgramDTOs = study_ProgramService.getAllStudyPrograms();
                         JSONArray studyProgramJsonArray = new JSONArray(study_ProgramDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", studyProgramJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "subject_for_practice":
                         List <Subject_For_PracticeDTO> subject_For_PracticeDTOs = subject_For_PracticeService.getAllSubjectsForPractice();
                         JSONArray subjectForPracticeJsonArray= new JSONArray(subject_For_PracticeDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", subjectForPracticeJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "work":
                         List <WorkDTO> workDTOs = workService.getAllWorks();
                         JSONArray workJsonArray = new JSONArray(workDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", workJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     case "communication":
                         List <CommunicationDTO> communicationDTOs = communicationService.getAllCommunications();
                         JSONArray communicationJsonArray = new JSONArray(communicationDTOs);
-                        responseObject.put("response_code", RESPONSECODE_OK);
                         responseObject.put("objectArray", communicationJsonArray);
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.OK);
                     default:
-                        responseObject.put("response_code", RESPONSECODE_ERROR);
                         responseObject.put("responseMessage", "Invalid class type");
-                        return responseObject.toString();
+                        return new ResponseEntity<>(responseObject,HttpStatus.BAD_REQUEST);
                 }
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na generovanie reportov touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
     @GetMapping(value = "/student/zobrazponuky")
-    public String viewOffers(@RequestBody String entity, @PathVariable String classType){
+    public ResponseEntity<?> viewOffers(@RequestBody String entity, @PathVariable String classType){
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -1175,24 +1074,21 @@ public class RestCallController {
             if(acc.getRole().equals("student")){
                 List <OfferDTO> offerDTOs = offerService.getAllOffers();
                     JSONArray offerJsonArray = new JSONArray(offerDTOs);
-                    responseObject.put("response_code", RESPONSECODE_OK);
                     responseObject.put("objectArray", offerJsonArray);
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.OK);
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie ponúk touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
     @GetMapping(value = "/student/vytvoritRobotuzPonuky")
-    public String createWorkFromOffer(@RequestBody String entity, @PathVariable String classType){
+    public ResponseEntity<?> createWorkFromOffer(@RequestBody String entity, @PathVariable String classType){
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -1209,23 +1105,20 @@ public class RestCallController {
                     workDTO.setCompletion_year(requestJsonObject.getString("completion_year"));
                 }
                 workService.saveWork(workDTO);
-                responseObject.put("response_code", RESPONSECODE_OK);
                 responseObject.put("responseMessage", Work.class.getName() + " instance created");
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.OK);
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie ponúk touto metódou");
 
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @GetMapping(value = "/student/vybratProgram")
-    public String chooseStudyProgram(@RequestBody String entity, @PathVariable String classType){
+    public ResponseEntity<?> chooseStudyProgram(@RequestBody String entity, @PathVariable String classType){
         JSONObject responseObject = new JSONObject();
         try {
             JSONObject requestJsonObject = new JSONObject(entity);
@@ -1236,24 +1129,20 @@ public class RestCallController {
                 if(accountDTO.getStudy_program_idstudy_program() == null || accountDTO.getStudy_program_idstudy_program() == 0){
                     accountDTO.setStudy_program_idstudy_program(requestJsonObject.getInt("study_program_id"));
                     accountService.saveAccount(accountDTO);
-                    responseObject.put("response_code", RESPONSECODE_OK);
                     responseObject.put("responseMessage", Account.class.getName() + " instance updated");
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.OK);
                 }else{
-                    responseObject.put("response_code", RESPONSECODE_ERROR);
                     responseObject.put("responseMessage", "Účet už má priradený študijný program");
-                    return responseObject.toString();
+                    return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
                 }
                 
             }else{
-                responseObject.put("response_code", RESPONSECODE_PERMISSION_DENIED);
                 responseObject.put("responseMessage", "Nemáš povolenie na pridavanie študijných programov touto metódou");
-                return responseObject.toString();
+                return new ResponseEntity<>(responseObject,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            responseObject.put("response_code", RESPONSECODE_ERROR);
             responseObject.put("responseMessage", e.getMessage());
-            return responseObject.toString();
+            return new ResponseEntity<>(responseObject,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
