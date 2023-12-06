@@ -49,12 +49,14 @@ public class DefaultStudy_ProgramService implements Study_ProgramService{
 
     private Study_ProgramDTO populateStudyProgramData(final Study_Program study_program) {
         Study_ProgramDTO study_programData = new Study_ProgramDTO();
+        study_programData.setIdstudy_program(study_program.getIdstudy_program());
         study_programData.setName(study_program.getName());
         return study_programData;
     }
 
     private Study_Program populateStudyProgramEntity(Study_ProgramDTO study_programData) {
         Study_Program study_program = new Study_Program();
+        study_program.setIdstudy_program(study_programData.getIdstudy_program());
         study_program.setName(study_programData.getName());
         return study_program;
     }
