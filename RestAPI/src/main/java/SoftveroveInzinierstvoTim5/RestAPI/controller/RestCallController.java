@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +20,8 @@ import com.github.javafaker.Faker;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
 
@@ -58,8 +62,9 @@ public class RestCallController {
         JSONArray jsonArray = new JSONArray(persons);
         return new ResponseEntity<>(jsonArray.toString(), HttpStatus.OK);
     }
-
-    @GetMapping("/dataSeed")
+    @Operation(summary = "Seeder for initializing Database")
+    @ApiResponse(responseCode = "200", description = "Database initalized with seed data")
+    @RequestMapping(value = "/dataSeed", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<?> handleDataSeedRequest(){
         //if (!personService.getAllPersons().isEmpty()) {
             for (int i = 0; i < 20; i++) {
