@@ -665,6 +665,196 @@ public class RestCallController {
         }
     }
 
+    @PostMapping("/studijnyProgramCreate")
+    public ResponseEntity<?> studijnyProgramCreate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Study_ProgramDTO study_ProgramDTO = new Study_ProgramDTO();
+                study_ProgramDTO.setName(json.getString("name"));
+                study_ProgramService.saveStudyProgram(study_ProgramDTO);
+                responseObject.put("responseMessage", Study_Program.class.getName() + " instance created");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/studijnyProgramRead")
+    public ResponseEntity<?> studijnyProgramRead(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(json.getInt("id"));
+                JSONObject responseStudyProgram = new JSONObject(study_ProgramDTO);
+                responseObject.put("object", responseStudyProgram);
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/studijnyProgramUpdate")
+    public ResponseEntity<?> studijnyProgramUpdate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(json.getInt("id"));
+                study_ProgramDTO.setName(json.getString("name"));
+                study_ProgramService.saveStudyProgram(study_ProgramDTO);
+                responseObject.put("responseMessage", Study_Program.class.getName() + " instance updated");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na aktualizovanie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/studijnyProgramDelete")
+    public ResponseEntity<?> studijnyProgramDelete(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                study_ProgramService.deleteStudyProgram(json.getInt("id"));
+                responseObject.put("responseMessage", Study_Program.class.getName() + " instance deleted");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na odstraňovanie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/predmetyPraxCreate")
+    public ResponseEntity<?> predmetyPraxCreate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Subject_For_PracticeDTO subject_For_PracticeDTO = new Subject_For_PracticeDTO();
+                subject_For_PracticeDTO.setCredits(json.getInt("credits"));
+                subject_For_PracticeDTO.setName(json.getString("name"));
+                subject_For_PracticeDTO.setStudy_program_idstudy_program(json.getInt("study_program_id"));
+                subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
+                responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance created");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/predmetyPraxRead")
+    public ResponseEntity<?> predmetyPraxRead(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(json.getInt("id"));
+                JSONObject responseSubjectForPractice = new JSONObject(subject_For_PracticeDTO);
+                responseObject.put("object", responseSubjectForPractice);
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/predmetyPraxUpdate")
+    public ResponseEntity<?> predmetyPraxUpdate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(json.getInt("id"));
+                subject_For_PracticeDTO.setCredits(json.getInt("credits"));
+                subject_For_PracticeDTO.setName(json.getString("name"));
+                subject_For_PracticeDTO.setStudy_program_idstudy_program(json.getInt("study_program_id"));
+                subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
+                responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance updated");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na aktualizovanie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/predmetyPraxDelete")
+    public ResponseEntity<?> predmetyPraxDelete(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                subject_For_PracticeService.deleteSubjectForPractice(json.getInt("id"));
+                responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance deleted");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vymazávanie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     /**
      * @apiNote Direct create method for each class in DB
      * @param entity request JSON
