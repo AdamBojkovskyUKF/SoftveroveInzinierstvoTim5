@@ -794,8 +794,10 @@ public class RestCallController {
 
             if(acc.getRole().equals("veduci_pracoviska")) {
                 Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(json.getInt("id"));
-                JSONObject responseSubjectForPractice = new JSONObject(subject_For_PracticeDTO);
-                responseObject.put("object", responseSubjectForPractice);
+                Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(subject_For_PracticeDTO.getStudy_program_idstudy_program());
+                responseObject.put(" Meno: ", subject_For_PracticeDTO.getName());
+                responseObject.put(" Kredity: ", subject_For_PracticeDTO.getCredits());
+                responseObject.put(" Študíjny program: ", study_ProgramDTO.getName());
                 return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
             } else {
                 responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie predmetov k odbornej praxi.");
