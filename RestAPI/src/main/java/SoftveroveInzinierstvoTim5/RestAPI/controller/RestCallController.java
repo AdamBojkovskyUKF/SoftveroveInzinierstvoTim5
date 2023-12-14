@@ -20,6 +20,7 @@ import com.github.javafaker.Faker;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
@@ -30,6 +31,8 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.lang3.ObjectUtils.Null;
 import org.hibernate.query.NativeQuery.ReturnProperty;
 import org.json.*;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 public class RestCallController {
@@ -622,6 +625,43 @@ public class RestCallController {
         } catch (Exception e) {
             responseObject.put("responeMessage", e.getMessage());
             return new ResponseEntity<>(responseObject.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/zobrazPonuky")
+    public ResponseEntity<?> zobrazPonuky(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            List <OfferDTO> offers = offerService.getAllOffers();
+            JSONArray offersArray = new JSONArray();
+
+            if(acc.getRole().equals("zastupca_firmy") || acc.getRole().equals("veduci_pracoviska")) {
+                for (OfferDTO offerDto : offers) {
+                    JSONObject offerJson = new JSONObject();
+                    CompanyDTO offerCompany = companyService.getCompanyId(offerDto.getCompany_id_company());
+
+                    offerJson.put("Typ kontraktu: ", offerDto.getContract_type());
+                    offerJson.put(" Popis: ", offerDto.getDescription());
+                    offerJson.put(" Pozícia: ", offerDto.getPosition());
+                    offerJson.put(" Firma: ", offerCompany.getName());
+
+                    offersArray.put(offerJson);
+                }
+
+                return new ResponseEntity<>(offersArray.toString(), HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš prístup k zobrazovaniu ponúk.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
