@@ -558,7 +558,7 @@ public class RestCallController {
         }
     }
 
-    @GetMapping("/odsuhlasitPracovnyVykaz")
+    @PostMapping("/odsuhlasitPracovnyVykaz")
     public ResponseEntity<?> odsuhlasitPracovnyVykaz(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         
@@ -576,6 +576,8 @@ public class RestCallController {
 
                 if(reprePerson.getId_person() == company.getRepresentative_id_person()) {
                     if(workDTO.getWork_log().length() > 100) {
+                        workDTO.setState("schvalena");
+                        workService.saveWork(workDTO);
                         responseObject.put("responseMessage", "Pracovný výkaz odsúhlasený.");
                         return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
                     } else {
@@ -586,7 +588,6 @@ public class RestCallController {
                     responseObject.put("responseMessage", "Nemáš prístup k tejto práci, pretože nie si zástupca danej firmy.");
                     return new ResponseEntity<>(responseObject.toString(),HttpStatus.UNAUTHORIZED);
                 }
-
 
             } else {
                 responseObject.put("responseMessage", "Nemáš povolenia odsúhlasovať pracovné výkazy.");
@@ -856,6 +857,78 @@ public class RestCallController {
             return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/vytvorPonukuPreSvojuOrganizaciu")
+    public ResponseEntity<?> vytvorPonukuPreSvojuOrganizaciu(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("zastupca_firmy")) {
+                CompanyDTO company = companyService.getCompanyId(acc.getCompany_id_company());
+                String contract_type = json.getString("contract_type");
+                String description = json.getString("description");
+                String position = json.getString("position");
+                String name = json.getString("name");
+                if(company.getName().equals(name)) {
+                    OfferDTO offerDTO = new OfferDTO();
+                    offerDTO.setCompany_id_company(acc.getCompany_id_company());
+                    offerDTO.setContract_type(contract_type);
+                    offerDTO.setDescription(description);
+                    offerDTO.setPosition(position);
+                    offerService.saveOffer(offerDTO);
+                    responseObject.put("responseMessage", Offer.class.getName() + " instance created");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
+                } else {
+                    responseObject.put("responseMessage", "Nie si zástupca pre túto firmu.");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.METHOD_NOT_ALLOWED);
+                }
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie pracovných ponúk.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    @PostMapping("/zmenitStudijnyLevelStudentovi")
+    public ResponseEntity<?> zmenitStudijnyLevelStudentovi(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                int student_id = json.getInt("student_id");
+                AccountDTO student_acc = accountService.getAccountId(student_id);
+                if(student_acc.getRole().equals("student")) {
+                    String study_level = json.getString("study_level");
+                    student_acc.setStudy_level(study_level);
+                    accountService.saveAccount(student_acc);
+
+                    responseObject.put("responseMessage", Account.class.getName() + " instance updated");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
+                } else {
+                    responseObject.put("responseMessage", "Zadaný account nie je študent.");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                responseObject.put("responseMessage", "Nemáš prístup ku zmene študíjneho levelu študentov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 
     /**
      * @apiNote Direct create method for each class in DB

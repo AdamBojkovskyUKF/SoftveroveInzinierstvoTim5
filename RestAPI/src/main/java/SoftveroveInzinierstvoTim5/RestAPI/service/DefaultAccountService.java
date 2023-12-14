@@ -57,6 +57,7 @@ public class DefaultAccountService implements AccountService{
         accountData.setPerson_id_person(account.getPerson_id_person());
         accountData.setRole(account.getRole());
         accountData.setSignup_year(account.getSignup_year());
+        accountData.setStudy_level(account.getStudy_level());
         accountData.setStudy_program_idstudy_program(account.getStudy_program_idstudy_program());
         return accountData;
     }
@@ -71,6 +72,7 @@ public class DefaultAccountService implements AccountService{
         account.setPerson_id_person(accountData.getPerson_id_person());
         account.setRole(accountData.getRole());
         account.setSignup_year(accountData.getSignup_year());
+        account.setStudy_level(accountData.getStudy_level());
         account.setStudy_program_idstudy_program(accountData.getStudy_program_idstudy_program());
         return account;
     }
