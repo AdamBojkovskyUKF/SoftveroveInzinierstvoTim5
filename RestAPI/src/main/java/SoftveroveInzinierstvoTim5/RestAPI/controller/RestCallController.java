@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.javafaker.Faker;
@@ -14,12 +17,17 @@ import com.github.javafaker.Faker;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.json.*;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 public class RestCallController {
@@ -53,41 +61,43 @@ public class RestCallController {
         return new ResponseEntity<>(jsonArray.toString(), HttpStatus.OK);
     }
 
-    @GetMapping("/dataSeed")
-    public ResponseEntity<?> handleDataSeedRequest() {
-        // if (!personService.getAllPersons().isEmpty()) {
-        for (int i = 0; i < 20; i++) {
-            PersonDTO p = new PersonDTO();
-            Faker faker = new Faker();
-            String firstName = faker.name().firstName();
-            String lastName = faker.name().lastName();
-            String streetAddress = faker.address().streetAddress();
+    @Operation(summary = "Seeder for initializing Database")
+    @ApiResponse(responseCode = "200", description = "Database initalized with seed data")
+    @RequestMapping(value = "/dataSeed", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<?> handleDataSeedRequest(){
+        //if (!personService.getAllPersons().isEmpty()) {
+            for (int i = 0; i < 20; i++) {
+                PersonDTO p = new PersonDTO();
+                Faker faker = new Faker();
+                String firstName = faker.name().firstName();
+                String lastName = faker.name().lastName();
+                String streetAddress = faker.address().streetAddress();
 
-            p.setName(firstName);
-            p.setSurname(lastName);
-            p.setAddress(streetAddress);
-            p.setPhone_number("+421912345678");
-            p.setEmail(firstName + lastName + "@gmail.com");
-            personService.savePerson(p);
-        }
-        // }
-        // if(!accountService.getAllAccounts().isEmpty()){
-        for (int i = 0; i < 20; i++) {
-            AccountDTO acc = new AccountDTO();
-            Faker faker = new Faker();
-            String firstName = faker.name().firstName();
-            String lastName = faker.name().lastName();
-            String streetAddress = faker.address().streetAddress();
+                p.setName(firstName);
+                p.setSurname(lastName);
+                p.setAddress(streetAddress);
+                p.setPhone_number("+421912345678");
+                p.setEmail(firstName+lastName+"@gmail.com");
+                personService.savePerson(p);
+            }
+        //}
+        //if(!accountService.getAllAccounts().isEmpty()){
+            for (int i = 0; i < 20; i++) {
+                AccountDTO acc = new AccountDTO();
+                Faker faker = new Faker();
+                String firstName = faker.name().firstName();
+                String lastName = faker.name().lastName();
+                String streetAddress = faker.address().streetAddress();
 
-            acc.setEmail_address(firstName + lastName + "@gmail.com");
-            acc.setInstitute(institute[faker.number().numberBetween(0, 2)]);
-            acc.setPassword("password");
-            acc.setStudy_level("placeholder");
-            acc.setSignup_year(faker.number().numberBetween(2000, 2030) + "");
-            acc.setRole(roly[faker.number().numberBetween(0, 4)]);
-            accountService.saveAccount(acc);
-        }
-        // }
+                acc.setEmail_address(firstName+lastName+"@gmail.com");
+                acc.setInstitute(institute[faker.number().numberBetween(0, 2)]);
+                acc.setPassword("password");
+                acc.setStudy_level("placeholder");
+                acc.setSignup_year(faker.number().numberBetween(2000, 2030)+"");
+                acc.setRole(roly[faker.number().numberBetween(0, 4)]);
+                accountService.saveAccount(acc);
+            }
+        //}
 
         AccountDTO adminAcc = new AccountDTO();
         adminAcc.setEmail_address("admin@admin.com");
@@ -550,7 +560,7 @@ public class RestCallController {
         }
     }
 
-    @GetMapping("/odsuhlasitPracovnyVykaz")
+    @PostMapping("/odsuhlasitPracovnyVykaz")
     public ResponseEntity<?> odsuhlasitPracovnyVykaz(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
@@ -566,8 +576,11 @@ public class RestCallController {
                 CompanyDTO company = companyService.getCompanyId(offer.getCompany_id_company());
                 PersonDTO reprePerson = personService.getPersonById(acc.getPerson_id_person());
 
-                if (reprePerson.getId_person() == company.getRepresentative_id_person()) {
-                    if (workDTO.getWork_log().length() > 100) {
+                if(reprePerson.getId_person() == company.getRepresentative_id_person()) {
+                    if(workDTO.getWork_log().length() > 100) {
+                        workDTO.setState("schvalena");
+                        workService.saveWork(workDTO);
+
                         responseObject.put("responseMessage", "Pracovný výkaz odsúhlasený.");
                         return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
                     } else {
@@ -620,6 +633,307 @@ public class RestCallController {
             return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/zobrazPonuky")
+    public ResponseEntity<?> zobrazPonuky(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            List <OfferDTO> offers = offerService.getAllOffers();
+            JSONArray offersArray = new JSONArray();
+
+            if(acc.getRole().equals("zastupca_firmy") || acc.getRole().equals("veduci_pracoviska")) {
+                for (OfferDTO offerDto : offers) {
+                    JSONObject offerJson = new JSONObject();
+                    CompanyDTO offerCompany = companyService.getCompanyId(offerDto.getCompany_id_company());
+
+                    offerJson.put("Typ kontraktu: ", offerDto.getContract_type());
+                    offerJson.put(" Popis: ", offerDto.getDescription());
+                    offerJson.put(" Pozícia: ", offerDto.getPosition());
+                    offerJson.put(" Firma: ", offerCompany.getName());
+
+                    offersArray.put(offerJson);
+                }
+
+                return new ResponseEntity<>(offersArray.toString(), HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš prístup k zobrazovaniu ponúk.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/studijnyProgramCreate")
+    public ResponseEntity<?> studijnyProgramCreate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Study_ProgramDTO study_ProgramDTO = new Study_ProgramDTO();
+                study_ProgramDTO.setName(json.getString("name"));
+                study_ProgramService.saveStudyProgram(study_ProgramDTO);
+                responseObject.put("responseMessage", Study_Program.class.getName() + " instance created");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/studijnyProgramRead")
+    public ResponseEntity<?> studijnyProgramRead(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(json.getInt("id"));
+                JSONObject responseStudyProgram = new JSONObject(study_ProgramDTO);
+                responseObject.put("object", responseStudyProgram);
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/studijnyProgramUpdate")
+    public ResponseEntity<?> studijnyProgramUpdate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(json.getInt("id"));
+                study_ProgramDTO.setName(json.getString("name"));
+                study_ProgramService.saveStudyProgram(study_ProgramDTO);
+                responseObject.put("responseMessage", Study_Program.class.getName() + " instance updated");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na aktualizovanie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/studijnyProgramDelete")
+    public ResponseEntity<?> studijnyProgramDelete(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                study_ProgramService.deleteStudyProgram(json.getInt("id"));
+                responseObject.put("responseMessage", Study_Program.class.getName() + " instance deleted");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na odstraňovanie študíjnych programov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/predmetyPraxCreate")
+    public ResponseEntity<?> predmetyPraxCreate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Subject_For_PracticeDTO subject_For_PracticeDTO = new Subject_For_PracticeDTO();
+                subject_For_PracticeDTO.setCredits(json.getInt("credits"));
+                subject_For_PracticeDTO.setName(json.getString("name"));
+                subject_For_PracticeDTO.setStudy_program_idstudy_program(json.getInt("study_program_id"));
+                subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
+                responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance created");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/predmetyPraxRead")
+    public ResponseEntity<?> predmetyPraxRead(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(json.getInt("id"));
+                Study_ProgramDTO study_ProgramDTO = study_ProgramService.getStudyProgramById(subject_For_PracticeDTO.getStudy_program_idstudy_program());
+                responseObject.put(" Meno: ", subject_For_PracticeDTO.getName());
+                responseObject.put(" Kredity: ", subject_For_PracticeDTO.getCredits());
+                responseObject.put(" Študíjny program: ", study_ProgramDTO.getName());
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na zobrazovanie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/predmetyPraxUpdate")
+    public ResponseEntity<?> predmetyPraxUpdate(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                Subject_For_PracticeDTO subject_For_PracticeDTO = subject_For_PracticeService.getSubjectForPracticeById(json.getInt("id"));
+                subject_For_PracticeDTO.setCredits(json.getInt("credits"));
+                subject_For_PracticeDTO.setName(json.getString("name"));
+                subject_For_PracticeDTO.setStudy_program_idstudy_program(json.getInt("study_program_id"));
+                subject_For_PracticeService.saveSubjectForPractice(subject_For_PracticeDTO);
+                responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance updated");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na aktualizovanie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/predmetyPraxDelete")
+    public ResponseEntity<?> predmetyPraxDelete(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                subject_For_PracticeService.deleteSubjectForPractice(json.getInt("id"));
+                responseObject.put("responseMessage", Subject_for_Practice.class.getName() + " instance deleted");
+                return new ResponseEntity<>(responseObject.toString(),HttpStatus.OK);
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vymazávanie predmetov k odbornej praxi.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/vytvorPonukuPreSvojuOrganizaciu")
+    public ResponseEntity<?> vytvorPonukuPreSvojuOrganizaciu(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("zastupca_firmy")) {
+                CompanyDTO company = companyService.getCompanyId(acc.getCompany_id_company());
+                String contract_type = json.getString("contract_type");
+                String description = json.getString("description");
+                String position = json.getString("position");
+                String name = json.getString("name");
+                if(company.getName().equals(name)) {
+                    OfferDTO offerDTO = new OfferDTO();
+                    offerDTO.setCompany_id_company(acc.getCompany_id_company());
+                    offerDTO.setContract_type(contract_type);
+                    offerDTO.setDescription(description);
+                    offerDTO.setPosition(position);
+                    offerService.saveOffer(offerDTO);
+                    responseObject.put("responseMessage", Offer.class.getName() + " instance created");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
+                } else {
+                    responseObject.put("responseMessage", "Nie si zástupca pre túto firmu.");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.METHOD_NOT_ALLOWED);
+                }
+            } else {
+                responseObject.put("responseMessage", "Nemáš povolenie na vytváranie pracovných ponúk.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    @PostMapping("/zmenitStudijnyLevelStudentovi")
+    public ResponseEntity<?> zmenitStudijnyLevelStudentovi(@RequestBody String requestString) {
+        JSONObject responseObject = new JSONObject();
+
+        try {
+            JSONObject json = new JSONObject(requestString);
+            int id = json.getInt("account_id");
+            AccountDTO acc = accountService.getAccountId(id);
+
+            if(acc.getRole().equals("veduci_pracoviska")) {
+                int student_id = json.getInt("student_id");
+                AccountDTO student_acc = accountService.getAccountId(student_id);
+                if(student_acc.getRole().equals("student")) {
+                    String study_level = json.getString("study_level");
+                    student_acc.setStudy_level(study_level);
+                    accountService.saveAccount(student_acc);
+
+                    responseObject.put("responseMessage", Account.class.getName() + " instance updated");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
+                } else {
+                    responseObject.put("responseMessage", "Zadaný account nie je študent.");
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                responseObject.put("responseMessage", "Nemáš prístup ku zmene študíjneho levelu študentov.");
+                return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            responseObject.put("responseMessage", e.getMessage());
+            return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 
     /**
      * @apiNote Direct create method for each class in DB
