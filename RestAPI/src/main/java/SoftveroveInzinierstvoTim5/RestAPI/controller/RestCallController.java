@@ -15,6 +15,8 @@ import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.json.*;
@@ -1304,6 +1306,9 @@ public class RestCallController {
                 int work = requestJsonObject.getInt("work_id");
                 WorkDTO workDTO = workService.getWorkById(work);
                 workDTO.setMark(requestJsonObject.getString("mark"));
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDateTime now = LocalDateTime.now();
+                workDTO.setCompletion_year(dtf.format(now));
                 workService.saveWork(workDTO);
                 responseObject.put("responseMessage", "Práca odsúhlasená.");
                 return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
