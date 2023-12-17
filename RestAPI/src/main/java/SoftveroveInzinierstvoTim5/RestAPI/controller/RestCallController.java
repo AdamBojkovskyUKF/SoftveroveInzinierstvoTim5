@@ -111,11 +111,9 @@ public class RestCallController {
         return new ResponseEntity<>("Data Loaded", HttpStatus.OK);
     }
 
-    /**
-     * @apiNote prihlasovanie sa
-     * @param RequestBody
-     * @return
-     */
+    @Operation(summary = "Login of a user.")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Login Successful")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Login Failed -> Username + Password Combination not found")
     @GetMapping(value = "/login")
     public ResponseEntity<?> handleLoginRequest(@RequestBody String RequestBody) {
         JSONObject json = new JSONObject(RequestBody);
@@ -136,11 +134,10 @@ public class RestCallController {
         return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
     }
 
-    /**
-     * @apiNote zobrazovanie firiem
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Zobrazovanie informácií o firmách")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Pole firiem")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu firiem.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazFirmy")
     public ResponseEntity<?> zobrazFirmy(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -177,11 +174,10 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote zobrazovanie studentov na praxi
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Zobrazenie zoznamu študentov na praxi")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "List študentov na praxi")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu študentov na praxi.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazStudentovNaPraxi")
     public ResponseEntity<?> zobrazStudentovNaPraxi(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -222,11 +218,10 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote zobrazovanie schvalenych a ukoncenych praxi
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Zobrazenie schválených a ukončených praxí")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "List študentov na praxi so stavom schválená alebo ukončená")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu schválených a ukončených praxí študentov.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazSchvaleneUkoncenePraxe")
     public ResponseEntity<?> zobrazSchvaleneUkoncenePraxe(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -270,11 +265,10 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote zobrazovanie studentov na praxi podla zvolenej katedry
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Zobrazenie študentov na praxi podľa zadanej katedry")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "List študentov na praxi na danej katedre")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazStudentovNaPraxiPodlaKatedry")
     public ResponseEntity<?> zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -320,11 +314,10 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote vytvorenie reportu za pracovisko
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Vytvorenie reportu za pracovisko")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Report úspešne vytvorený.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie pre vytváranie reportu za pracovisko.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/vytvorReportZaPracovisko")
     public ResponseEntity<?> vytvorReportZaPracovisko(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -360,11 +353,10 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote zobrazovanie spatnych vazieb zastupcu zadanej firmy
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Zobrazenie spätnej väzby zástupcov firiem")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "List spätných väzieb od zástupcov firiem")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na zobrazenie spätných väzieb zástupcu firmy.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazSpatneVazbyZastupcuFirmy")
     public ResponseEntity<?> zobrazSpatneVazbyZastupcuFirmy(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -409,11 +401,11 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote priradovanie povereneho pracovnika pracoviska ku ponuke praxi
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Priradenie povereného pracovníka pracoviska")
+    @ApiResponse(responseCode = "HttpStatus.CONFLICT", description = "Zadaná ponuka už má prideleného povereného pracovníka katedry.")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Úspešne si priradil povereného pracovníka katedry danej pracovnej ponuke.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie priraďovať poverených pracovníkov katedier k ponukám práce.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/priradPoverenehoPracovnika")
     public ResponseEntity<?> priradPoverenehoPracovnika(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -432,7 +424,7 @@ public class RestCallController {
                     responseObject.put("responseMessage",
                             "Zadaná ponuka už má prideleného povereného pracovníka katedry.");
 
-                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.CONFLICT);
                 } else {
                     offer.setOverseer_id_person(overseer_id_person);
                     offerService.saveOffer(offer);
@@ -454,11 +446,10 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote zobrazovanie praxe v danej organizacii
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Zobrazenie zoznamu praxí v danej organizácií")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "List praxí v danej organizácií")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na zobrazenie praxí v danej organizácií.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazitPraxeVoSvojejOrganizacii")
     public ResponseEntity<?> zobrazitPraxeVoSvojejOrganizacii(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -495,7 +486,7 @@ public class RestCallController {
                     }
                 }
 
-                return new ResponseEntity<>(worksArray.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(worksArray.toString(), HttpStatus.OK);
             } else {
                 responseObject.put("responseMessage", "Nemáš povolenie na zobrazenie praxí v danej organizácií.");
                 return new ResponseEntity<>(responseObject.toString(), HttpStatus.UNAUTHORIZED);
@@ -507,11 +498,12 @@ public class RestCallController {
         }
     }
 
-    /**
-     * @apiNote vytvrania spatnej vazby od firiem k pracam
-     * @param requestString
-     * @return
-     */
+    @Operation(summary = "Vytvorenie spätnej väzby ku praxi")
+    @ApiResponse(responseCode = "HttpStatus.CONFLICT", description = "Zadaná práca už má vytvorenú spätnú väzbu od firmy.")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Úspešne si vytvoril spätnú väzbu firmy pre zadanú prax.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k tejto praxi, pretože nie si zástupca firmy, v ktorej sa vykonáva.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie spätných väzieb firiem.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/vytvorSpatnuVazbuPraxe")
     public ResponseEntity<?> vytvorSpatnuVazbuPraxe(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -533,7 +525,7 @@ public class RestCallController {
                 if (company.getRepresentative_id_person() == reprePerson.getId_person()) {
                     if (work.getFeedback_company() != null) {
                         responseObject.put("responseMessage", "Zadaná práca už má vytvorenú spätnú väzbu od firmy.");
-                        return new ResponseEntity<>(responseObject.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+                        return new ResponseEntity<>(responseObject.toString(), HttpStatus.CONFLICT);
                     } else {
                         work.setFeedback_company(spatnaVazba);
                         workService.saveWork(work);
@@ -560,6 +552,12 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Odsúhlasenie pracovného výkazu")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Pracovný výkaz odsúhlasený.")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Pracovný výkaz zamietnutý.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k tejto práci, pretože nie si zástupca danej firmy.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenia odsúhlasovať pracovné výkazy.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/odsuhlasitPracovnyVykaz")
     public ResponseEntity<?> odsuhlasitPracovnyVykaz(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -605,6 +603,10 @@ public class RestCallController {
 
     }
 
+    @Operation(summary = "Zmena hesla")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Úspešne si si zmenil heslo.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Heslo sa nepodarilo zmeniť, pretože prihlasovacie údaje sú nesprávne.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/zmenaHesla")
     public ResponseEntity<?> zmenaHesla(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -634,6 +636,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Zobrazenie ponúk praxí")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "List ponúk prác")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazovaniu ponúk.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/zobrazPonuky")
     public ResponseEntity<?> zobrazPonuky(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -671,6 +677,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Vytvorenie študíjneho programu")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance created.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie študíjnych programov.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/studijnyProgramCreate")
     public ResponseEntity<?> studijnyProgramCreate(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -695,6 +705,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Prečítanie a zobrazenie študíjneho programu")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Zobrazenie študíjneho programu.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na zobrazovanie študíjnych programov.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/studijnyProgramRead")
     public ResponseEntity<?> studijnyProgramRead(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -718,6 +732,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Aktualizovanie študíjneho programu")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance updated.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na aktualizovanie študíjnych programov.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/studijnyProgramUpdate")
     public ResponseEntity<?> studijnyProgramUpdate(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -742,6 +760,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Vymazanie študíjneho programu")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance deleted.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na odstraňovanie študíjnych programov.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/studijnyProgramDelete")
     public ResponseEntity<?> studijnyProgramDelete(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -764,6 +786,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Pridanie predmetu na prax")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance created.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie predmetov k odbornej praxi.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/predmetyPraxCreate")
     public ResponseEntity<?> predmetyPraxCreate(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -790,6 +816,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Prečítanie a zobrazenie predmetu na prax")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Zobrazenie predmetu na prax.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na zobrazovanie predmetov k odbornej praxi.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/predmetyPraxRead")
     public ResponseEntity<?> predmetyPraxRead(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -815,6 +845,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Aktualizovanie predmetu na prax")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance updated.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na aktualizovanie predmetov k odbornej praxi.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/predmetyPraxUpdate")
     public ResponseEntity<?> predmetyPraxUpdate(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -841,6 +875,10 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Vymazanie predmetu na prax")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance deleted.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vymazávanie predmetov k odbornej praxi.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @GetMapping("/predmetyPraxDelete")
     public ResponseEntity<?> predmetyPraxDelete(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -863,6 +901,11 @@ public class RestCallController {
         }
     }
 
+    @Operation(summary = "Vytvorenie ponuky na prax pre svoju organizáciu")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance created.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nie si zástupca pre túto firmu.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie pracovných ponúk.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/vytvorPonukuPreSvojuOrganizaciu")
     public ResponseEntity<?> vytvorPonukuPreSvojuOrganizaciu(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -901,6 +944,11 @@ public class RestCallController {
         }
     }
     
+    @Operation(summary = "Zmeniť študíjny level študentovi")
+    @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance updated.")
+    @ApiResponse(responseCode = "HttpStatus.CONFLICT", description = "Zadaný account nie je študent.")
+    @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup ku zmene študíjneho levelu študentov.")
+    @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
     @PostMapping("/zmenitStudijnyLevelStudentovi")
     public ResponseEntity<?> zmenitStudijnyLevelStudentovi(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -922,7 +970,7 @@ public class RestCallController {
                     return new ResponseEntity<>(responseObject.toString(), HttpStatus.OK);
                 } else {
                     responseObject.put("responseMessage", "Zadaný account nie je študent.");
-                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(responseObject.toString(), HttpStatus.CONFLICT);
                 }
             } else {
                 responseObject.put("responseMessage", "Nemáš prístup ku zmene študíjneho levelu študentov.");
