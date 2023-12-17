@@ -17,7 +17,6 @@ import com.github.javafaker.Faker;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import SoftveroveInzinierstvoTim5.RestAPI.service.*;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
