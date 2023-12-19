@@ -20,6 +20,8 @@ public class Work {
  private String feedback_company;
  private String mark;
  private String completion_year;
+ @Lob
+ private byte[] certificate;
 
  public Work() {
  }
@@ -102,6 +104,14 @@ public class Work {
 
     public void setCompletion_year(String completion_year) {
         this.completion_year = completion_year;
+    }
+
+    public byte[] getCertificate() {
+        return this.certificate;
+    }
+
+    public void setCertificate(byte[] certificate) {
+        this.certificate = certificate;
     }
 
 }
