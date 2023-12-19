@@ -18,6 +18,7 @@ public class DefaultPersonService implements PersonService {
 
     @Autowired
     PersonRepository personRepository;
+    
     @Override
     public PersonDTO savePerson(PersonDTO person) {
         Person personModel = populatePersonEntity(person);
@@ -42,25 +43,30 @@ public class DefaultPersonService implements PersonService {
 
     @Override
     public PersonDTO getPersonById(final Integer personId) {
-        return populatePersonData(personRepository.findById(personId).orElseThrow(() -> new EntityNotFoundException("Customer not found")));
+        return populatePersonData(personRepository.findById(personId).orElseThrow(() -> new EntityNotFoundException("Person not found")));
     }
 
     private PersonDTO populatePersonData(final Person person) {
         PersonDTO personData = new PersonDTO();
         personData.setId_person(person.getId_person());
+        personData.setAddress(person.getAddress());
         personData.setName(person.getName());
         personData.setSurname(person.getSurname());
         personData.setEmail(person.getEmail());
         personData.setPhone_number(person.getPhone_number());
+        personData.setAddress(person.getAddress());
         return personData;
     }
 
     private Person populatePersonEntity(PersonDTO personData) {
         Person person = new Person();
+        person.setId_person(personData.getId_person());
+        person.setAddress(personData.getAddress());
         person.setName(personData.getName());
         person.setSurname(personData.getSurname());
         person.setEmail(personData.getEmail());
         person.setPhone_number(personData.getPhone_number());
+        person.setAddress(personData.getAddress());
         return person;
     }
 }

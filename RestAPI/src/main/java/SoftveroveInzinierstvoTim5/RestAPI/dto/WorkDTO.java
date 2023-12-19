@@ -1,15 +1,6 @@
-package SoftveroveInzinierstvoTim5.RestAPI.model;
+package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import jakarta.persistence.*;
-
- @Entity
- @EntityListeners(AuditingEntityListener.class)
-public class Work {
-
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class WorkDTO {
  private int id_work;
  private int offer_id_offer;
  private int account_id_account;
@@ -20,11 +11,8 @@ public class Work {
  private String feedback_company;
  private String mark;
  private String completion_year;
- @Lob
  private byte[] certificate;
 
- public Work() {
- }
 
     public int getId_work() {
         return this.id_work;
@@ -113,5 +101,6 @@ public class Work {
     public void setCertificate(byte[] certificate) {
         this.certificate = certificate;
     }
+    
 
 }

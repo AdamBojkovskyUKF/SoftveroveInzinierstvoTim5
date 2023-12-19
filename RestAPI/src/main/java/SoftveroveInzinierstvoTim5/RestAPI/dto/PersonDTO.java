@@ -1,5 +1,6 @@
 package SoftveroveInzinierstvoTim5.RestAPI.dto;
 
+
 public class PersonDTO {
     private int id_person;
     private String name;
