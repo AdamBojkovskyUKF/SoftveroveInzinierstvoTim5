@@ -79,7 +79,7 @@ public class RestCallControllerStudent extends GeneralController {
                 WorkDTO workDTO = new WorkDTO();
                 workDTO.setAccount_id_account(acc_id);
                 workDTO.setOffer_id_offer(requestJsonObject.getInt("offer_id"));
-                workDTO.setContract(requestJsonObject.getString("contract"));
+                workDTO.setContract((byte[])requestJsonObject.get("contract"));
                 workDTO.setState(requestJsonObject.getString("state"));
                 workDTO.setWork_log(requestJsonObject.getString("work_log"));
                 if (!requestJsonObject.getString("completion_year").isEmpty()

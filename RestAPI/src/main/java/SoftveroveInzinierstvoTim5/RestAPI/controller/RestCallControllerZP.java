@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.json.*;
 
 
@@ -46,7 +48,10 @@ public class RestCallControllerZP extends GeneralController {
                     PersonDTO reprePerson = personService.getPersonById(acc.getPerson_id_person());
 
                     if (reprePerson.getId_person() == company.getRepresentative_id_person()) {
-                        work.put(" Kontrakt: ", workDTO.getContract());
+                        byte[] bytes = workDTO.getContract();
+                        String base64String = Base64.encodeBase64String(bytes);
+                        responseObject.put("certificateBase64String", base64String);
+                        work.put(" Kontrakt: ", base64String);
                         work.put(" Stav: ", workDTO.getState());
                         work.put(" Popis práce: ", workDTO.getWork_log());
                         work.put(" Spätná väzba študent: ", workDTO.getFeedback_student());
@@ -78,7 +83,7 @@ public class RestCallControllerZP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k tejto praxi, pretože nie si zástupca firmy, v ktorej sa vykonáva.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie spätných väzieb firiem.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @PostMapping("/vytvorSpatnuVazbuPraxe")
+    @PutMapping("/vytvorSpatnuVazbuPraxe")
     public ResponseEntity<?> vytvorSpatnuVazbuPraxe(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
@@ -223,7 +228,7 @@ public class RestCallControllerZP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nie si zástupca pre túto firmu.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie pracovných ponúk.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @PostMapping("/vytvorPonukuPreSvojuOrganizaciu")
+    @PutMapping("/vytvorPonukuPreSvojuOrganizaciu")
     public ResponseEntity<?> vytvorPonukuPreSvojuOrganizaciu(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 

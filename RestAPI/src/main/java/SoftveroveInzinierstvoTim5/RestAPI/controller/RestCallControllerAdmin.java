@@ -160,7 +160,7 @@ public class RestCallControllerAdmin extends GeneralController {
                         WorkDTO workDTO = new WorkDTO();
                         workDTO.setAccount_id_account(requestJsonObject.getInt("work_account_id"));
                         workDTO.setCompletion_year(requestJsonObject.getString("completion_year"));
-                        workDTO.setContract(requestJsonObject.getString("contract"));
+                        workDTO.setContract((byte[])requestJsonObject.get("contract"));
                         workDTO.setFeedback_company(requestJsonObject.getString("feedback_company"));
                         workDTO.setFeedback_student(requestJsonObject.getString("feedback_student"));
                         workDTO.setMark(requestJsonObject.getString("mark"));
@@ -367,7 +367,7 @@ public class RestCallControllerAdmin extends GeneralController {
                         WorkDTO workDTO = workService.getWorkById(requestJsonObject.getInt("id"));
                         workDTO.setAccount_id_account(requestJsonObject.getInt("work_account_id"));
                         workDTO.setCompletion_year(requestJsonObject.getString("completion_year"));
-                        workDTO.setContract(requestJsonObject.getString("contract"));
+                        workDTO.setContract((byte[])requestJsonObject.get("contract"));
                         workDTO.setFeedback_company(requestJsonObject.getString("feedback_company"));
                         workDTO.setFeedback_student(requestJsonObject.getString("feedback_student"));
                         workDTO.setMark(requestJsonObject.getString("mark"));
