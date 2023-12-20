@@ -13,7 +13,8 @@ public class Work {
  private int id_work;
  private int offer_id_offer;
  private int account_id_account;
- private String contract;
+ @Lob
+ private byte[] contract;
  private String work_log;
  private String state;
  private String feedback_student;
@@ -50,11 +51,11 @@ public class Work {
         this.account_id_account = account_id_account;
     }
 
-    public String getContract() {
+    public byte[] getContract() {
         return this.contract;
     }
 
-    public void setContract(String contract) {
+    public void setContract(byte[] contract) {
         this.contract = contract;
     }
 
@@ -113,5 +114,6 @@ public class Work {
     public void setCertificate(byte[] certificate) {
         this.certificate = certificate;
     }
+
 
 }

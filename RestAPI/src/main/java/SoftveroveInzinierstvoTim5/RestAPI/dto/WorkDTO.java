@@ -4,7 +4,7 @@ public class WorkDTO {
  private int id_work;
  private int offer_id_offer;
  private int account_id_account;
- private String contract;
+ private byte[] contract;
  private String work_log;
  private String state;
  private String feedback_student;
@@ -12,7 +12,6 @@ public class WorkDTO {
  private String mark;
  private String completion_year;
  private byte[] certificate;
-
 
     public int getId_work() {
         return this.id_work;
@@ -38,11 +37,11 @@ public class WorkDTO {
         this.account_id_account = account_id_account;
     }
 
-    public String getContract() {
+    public byte[] getContract() {
         return this.contract;
     }
 
-    public void setContract(String contract) {
+    public void setContract(byte[] contract) {
         this.contract = contract;
     }
 
@@ -101,6 +100,5 @@ public class WorkDTO {
     public void setCertificate(byte[] certificate) {
         this.certificate = certificate;
     }
-    
 
 }

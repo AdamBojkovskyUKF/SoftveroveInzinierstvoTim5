@@ -2,14 +2,19 @@ package SoftveroveInzinierstvoTim5.RestAPI.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import SoftveroveInzinierstvoTim5.RestAPI.APISchemas.LoginCredentialsSchemaAfterLogin;
 import SoftveroveInzinierstvoTim5.RestAPI.dto.*;
 import SoftveroveInzinierstvoTim5.RestAPI.model.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
@@ -24,6 +29,10 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "List študentov na praxi")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu študentov na praxi.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody (description = "JSON obsahujúci potrebné údaje pre metódu", required = true, content = {
+        @Content(mediaType = "application/json",
+        schema = @Schema(allOf = {LoginCredentialsSchemaAfterLogin.class}))
+        })
     @GetMapping("/zobrazStudentovNaPraxi")
     public ResponseEntity<?> zobrazStudentovNaPraxi(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -68,6 +77,10 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "List študentov na praxi so stavom schválená alebo ukončená")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu schválených a ukončených praxí študentov.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody (description = "JSON obsahujúci potrebné údaje pre metódu", required = true, content = {
+        @Content(mediaType = "application/json",
+        schema = @Schema(allOf = {LoginCredentialsSchemaAfterLogin.class}))
+        })
     @GetMapping("/zobrazSchvaleneUkoncenePraxe")
     public ResponseEntity<?> zobrazSchvaleneUkoncenePraxe(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -115,6 +128,10 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "List študentov na praxi na danej katedre")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš prístup k zobrazeniu študentov na praxi podľa zadanej katedry.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody (description = "JSON obsahujúci potrebné údaje pre metódu", required = true, content = {
+        @Content(mediaType = "application/json",
+        schema = @Schema(allOf = {LoginCredentialsSchemaAfterLogin.class}))
+        })
     @GetMapping("/zobrazStudentovNaPraxiPodlaKatedry")
     public ResponseEntity<?> zobrazStudentovNaPraxiPodlaKatedry(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
@@ -164,7 +181,7 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "Report úspešne vytvorený.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie pre vytváranie reportu za pracovisko.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @PostMapping("/vytvorReportZaPracovisko")
+    @PutMapping("/vytvorReportZaPracovisko")
     public ResponseEntity<?> vytvorReportZaPracovisko(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
 
@@ -296,7 +313,7 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance created.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie študíjnych programov.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @PostMapping("/studijnyProgramCreate")
+    @PutMapping("/studijnyProgramCreate")
     public ResponseEntity<?> studijnyProgramCreate(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         try {
@@ -379,7 +396,7 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance deleted.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na odstraňovanie študíjnych programov.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @GetMapping("/studijnyProgramDelete")
+    @DeleteMapping("/studijnyProgramDelete")
     public ResponseEntity<?> studijnyProgramDelete(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         try {
@@ -405,7 +422,7 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance created.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vytváranie predmetov k odbornej praxi.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @PostMapping("/predmetyPraxCreate")
+    @PutMapping("/predmetyPraxCreate")
     public ResponseEntity<?> predmetyPraxCreate(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         try {
@@ -494,7 +511,7 @@ public class RestCallControllerVP extends GeneralController {
     @ApiResponse(responseCode = "HttpStatus.OK", description = "Instance deleted.")
     @ApiResponse(responseCode = "HttpStatus.UNAUTHORIZED", description = "Nemáš povolenie na vymazávanie predmetov k odbornej praxi.")
     @ApiResponse(responseCode = "HttpStatus.INTERNAL_SERVER_ERROR", description = "Internal Server Error")
-    @GetMapping("/predmetyPraxDelete")
+    @DeleteMapping("/predmetyPraxDelete")
     public ResponseEntity<?> predmetyPraxDelete(@RequestBody String requestString) {
         JSONObject responseObject = new JSONObject();
         try {
